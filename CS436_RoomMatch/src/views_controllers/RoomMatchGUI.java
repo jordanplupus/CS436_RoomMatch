@@ -44,6 +44,10 @@ public class RoomMatchGUI extends Application {
 		stage.show();
 	}
 	
+	public void setToPage(BorderPane page) {
+		window.setCenter(page);
+	}
+	
 	// Where login database will have to be accessed
 	// For now just a dummy method
 	// Note: no public private modifier, lowers security by one level: 
