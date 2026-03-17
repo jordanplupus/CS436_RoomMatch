@@ -57,7 +57,7 @@ public class RoomMatchGUI extends Application {
 			stage.setWidth(500);
 			stage.setHeight(500);
 			stage.setTitle("User Profile");
-			userProfile.setUser(username);
+			userProfile.login(username);
 			mainPage.initializePanel(userProfile);
 			setViewTo(mainPageView);
 		}

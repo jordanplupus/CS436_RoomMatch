@@ -43,6 +43,8 @@ public class LoginPage {
 		
 		EventHandler<ActionEvent> handleLogin = new LoginHandler();
 		login.setOnAction(handleLogin);
+		usernameTextField.setOnAction(handleLogin);
+		passwordTextField.setOnAction(handleLogin);
 		
 		EventHandler<ActionEvent> handleRegistration = new RegisterHandler();
 		register.setOnAction(handleRegistration);

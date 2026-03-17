@@ -42,6 +42,8 @@ public class RegisterPage {
 		
 		EventHandler<ActionEvent> handleRegistration = new RegisterHandler();
 		register.setOnAction(handleRegistration);
+		usernameTextField.setOnAction(handleRegistration);
+		passwordTextField.setOnAction(handleRegistration);
 		
 		EventHandler<ActionEvent> returnToLogin = new ReturnHandler();
 		prevPage.setOnAction(returnToLogin);
