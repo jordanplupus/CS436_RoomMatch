@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.UserProfile;
+import model.DatabaseManager;
 import model.Observer;
 
 /**
@@ -15,7 +16,7 @@ public class RoomMatchGUI extends Application {
 	public static void main(String[] args) {
 		launch(args);
 	}
-	
+	private DatabaseManager db = new DatabaseManager();
 	private UserProfile userProfile;
 	private MainPageView mainPage = new MainPageView();
 	
@@ -27,6 +28,8 @@ public class RoomMatchGUI extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
+		
+		db.init();
 		this.stage = stage;
 		stage.setTitle("Login");
 		window = new BorderPane();
@@ -53,6 +56,7 @@ public class RoomMatchGUI extends Application {
 	// Note: no public private modifier, lowers security by one level: 
 	//		 -> other methods in same package can access this method
 	void attemptLogin(String username, String password) {
+		// dummy profile
 		if( username.equals("Smith") && password.equals("password") ) {
 			stage.setWidth(500);
 			stage.setHeight(500);
@@ -61,6 +65,26 @@ public class RoomMatchGUI extends Application {
 			mainPage.initializePanel(userProfile);
 			setViewTo(mainPageView);
 		}
+		if (db.isValid(username, password)) {
+			stage.setWidth(500);
+			stage.setHeight(500);
+			stage.setTitle("User Profile");
+			userProfile.login(username);
+			mainPage.initializePanel(userProfile);
+			setViewTo(mainPageView);
+		}
+	}
+	
+	void register(String username, String password) {
+		if (db.insert(username, password)) {
+			stage.setWidth(500);
+			stage.setHeight(500);
+			stage.setTitle("User Profile");
+			userProfile.login(username);
+			mainPage.initializePanel(userProfile);
+			setViewTo(mainPageView);
+		}
+		
 	}
 	
 	private void setViewTo(Observer newView) {
