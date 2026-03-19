@@ -8,7 +8,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import model.DatabaseManager;
 
 public class LoginPage {
 	private TextField usernameTextField = new TextField();
@@ -55,15 +54,18 @@ public class LoginPage {
 	
 	private class LoginHandler implements EventHandler<ActionEvent> {
 		private int counter;
-		
 		@Override
 		public void handle(ActionEvent arg0) {
-			controller.attemptLogin(usernameTextField.getText(), passwordTextField.getText());
-			
-			// if login fails print failure text
-			information.setText("Invalid username or password, please try again\n"
-					+ "Login attempts: " + ++counter);
-			passwordTextField.setText("");
+			boolean success = controller.attemptLogin(
+				usernameTextField.getText(),
+				passwordTextField.getText()
+			);
+
+			if (!success) {
+				information.setText("Invalid username or password, please try again\n"
+						+ "Login attempts: " + ++counter);
+				passwordTextField.setText("");
+			}
 		}
 	}
 	
@@ -76,5 +78,4 @@ public class LoginPage {
 		}
 	}
 }
-
 

@@ -29,7 +29,9 @@ public class RoomMatchGUI extends Application {
 	@Override
 	public void start(Stage stage) throws Exception {
 		
+		//Initialize Database Table
 		db.init();
+		
 		this.stage = stage;
 		stage.setTitle("Login");
 		window = new BorderPane();
@@ -51,38 +53,57 @@ public class RoomMatchGUI extends Application {
 		window.setCenter(page);
 	}
 	
-	// Where login database will have to be accessed
-	// For now just a dummy method
-	// Note: no public private modifier, lowers security by one level: 
-	//		 -> other methods in same package can access this method
-	void attemptLogin(String username, String password) {
+	public void showMainPage() {
+		stage.setWidth(500);
+		stage.setHeight(400);
+		stage.setTitle("User Profile");
+
+		mainPage.initializePanel(userProfile);
+		setViewTo(mainPageView);
+	}
+	
+	// Temporary login logic for Iteration 1 using hardcoded credentials.
+	// This will be replaced with SQLite-based authentication in future iterations.
+	boolean attemptLogin(String username, String password) {
 		// dummy profile
 		if( username.equals("Smith") && password.equals("password") ) {
 			stage.setWidth(500);
-			stage.setHeight(500);
-			stage.setTitle("User Profile");
+			stage.setHeight(350);
+			stage.setTitle("Set Preferences");
+
 			userProfile.login(username);
-			mainPage.initializePanel(userProfile);
-			setViewTo(mainPageView);
+
+			PreferencePage preferencePage = new PreferencePage(this, userProfile);
+			setToPage(preferencePage.initializePanel());
+			
+			return true;
 		}
 		if (db.isValid(username, password)) {
 			stage.setWidth(500);
-			stage.setHeight(500);
-			stage.setTitle("User Profile");
+			stage.setHeight(350);
+			stage.setTitle("Set Preferences");
+
 			userProfile.login(username);
-			mainPage.initializePanel(userProfile);
-			setViewTo(mainPageView);
+
+			PreferencePage preferencePage = new PreferencePage(this, userProfile);
+			setToPage(preferencePage.initializePanel());
+			
+			return true;
 		}
+		
+		return false;
 	}
 	
 	void register(String username, String password) {
 		if (db.insert(username, password)) {
 			stage.setWidth(500);
-			stage.setHeight(500);
-			stage.setTitle("User Profile");
+			stage.setHeight(350);
+			stage.setTitle("Set Preferences");
+
 			userProfile.login(username);
-			mainPage.initializePanel(userProfile);
-			setViewTo(mainPageView);
+
+			PreferencePage preferencePage = new PreferencePage(this, userProfile);
+			setToPage(preferencePage.initializePanel());
 		}
 		
 	}
