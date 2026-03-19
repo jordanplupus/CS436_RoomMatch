@@ -5,8 +5,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import model.UserProfile;
 import model.Observer;
+import model.UserProfile;
 
 /**
  * <p>Main is contained in this method.</p>
@@ -47,19 +47,30 @@ public class RoomMatchGUI extends Application {
 	public void setToPage(BorderPane page) {
 		window.setCenter(page);
 	}
+
+	public void showMainPage() {
+		stage.setWidth(500);
+		stage.setHeight(400);
+		stage.setTitle("User Profile");
+
+		mainPage.initializePanel(userProfile);
+		setViewTo(mainPageView);
+	}
 	
-	// Where login database will have to be accessed
-	// For now just a dummy method
-	// Note: no public private modifier, lowers security by one level: 
-	//		 -> other methods in same package can access this method
+	// Temporary login logic for Iteration 1 using hardcoded credentials.
+	// This will be replaced with SQLite-based authentication in future iterations.
 	void attemptLogin(String username, String password) {
-		if( username.equals("Smith") && password.equals("password") ) {
+		if (username.equals("Smith") && password.equals("password")) {
+
 			stage.setWidth(500);
-			stage.setHeight(500);
-			stage.setTitle("User Profile");
+			stage.setHeight(350);
+			stage.setTitle("Set Preferences");
+
 			userProfile.login(username);
-			mainPage.initializePanel(userProfile);
-			setViewTo(mainPageView);
+
+			// go to preference page instead of main page
+			PreferencePage preferencePage = new PreferencePage(this, userProfile);
+			setToPage(preferencePage.initializePanel());
 		}
 	}
 	
