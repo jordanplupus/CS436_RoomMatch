@@ -17,6 +17,8 @@ public class RoomMatchGUI extends Application {
 		launch(args);
 	}
 	
+	private int currentUserId = -1;
+
 	private DatabaseManager db = new DatabaseManager();
 	private UserProfile userProfile;
 	private MainPageView mainPage = new MainPageView();
@@ -32,6 +34,10 @@ public class RoomMatchGUI extends Application {
 		
 		//Initialize database
 		db.init();
+		// Add admin account
+		db.seedAdmin();
+		// Show what's in the db
+		db.printAllData();
 		
 		this.stage = stage;
 		stage.setTitle("Login");
@@ -59,24 +65,21 @@ public class RoomMatchGUI extends Application {
 		stage.setHeight(400);
 		stage.setTitle("User Profile");
 
-		mainPage.initializePanel(userProfile);
+		mainPage.initializePanel(userProfile, this);
 		setViewTo(mainPageView);
 	}
 	
 	// Temporary login logic for Iteration 1 using hardcoded credentials.
 	// This will be replaced with SQLite-based authentication in future iterations.
 	boolean attemptLogin(String username, String password) {
-		if (username.equals("Smith") && password.equals("password") || db.isValid(username, password)) {
-
+		if (db.isValid(username, password)) {
+			currentUserId = db.getUserId(username);
 			stage.setWidth(500);
 			stage.setHeight(350);
 			stage.setTitle("Set Preferences");
-
 			userProfile.login(username);
-
 			PreferencePage preferencePage = new PreferencePage(this, userProfile);
 			setToPage(preferencePage.initializePanel());
-
 			return true;
 		}
 		return false;
@@ -84,6 +87,7 @@ public class RoomMatchGUI extends Application {
 	
 	void register(String username, String password) {
 		if (db.insert(username, password)) {
+			currentUserId = db.getUserId(username);
 			stage.setWidth(500);
 			stage.setHeight(350);
 			stage.setTitle("Set Preferences");
@@ -100,5 +104,17 @@ public class RoomMatchGUI extends Application {
 		window.setCenter(null);
 		currentView = newView;
 		window.setCenter((Node) currentView);
+	}
+
+	public void savePreferences(String sleep, String cleanliness, String guests) {
+		db.savePreferences(currentUserId, sleep, cleanliness, guests);
+	}
+
+	public java.util.List<model.UserProfile> getMatches() {
+    	return db.getAllProfilesExcept(currentUserId);
+	}
+
+	public int getCurrentUserId() {
+		return currentUserId;
 	}
 }

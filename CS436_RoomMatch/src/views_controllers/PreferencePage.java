@@ -73,6 +73,7 @@ public class PreferencePage {
             }
 
             userProfile.setPreferences(sleep, clean, guest);
+            controller.savePreferences(sleep, clean, guest);
             controller.showMainPage();
         }
     }

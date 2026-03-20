@@ -13,7 +13,7 @@ import model.UserProfile;
 public class MainPageView extends BorderPane implements Observer {
 	UserProfile userProfile;
 	
-	public void initializePanel(UserProfile user) {
+	public void initializePanel(UserProfile user, RoomMatchGUI controller) {
 		this.setTop(null);
 		this.setCenter(null);
 
@@ -34,29 +34,21 @@ public class MainPageView extends BorderPane implements Observer {
 		Label cleanlinessLabel = new Label("Cleanliness: " + userProfile.getCleanliness());
 		Label guestsLabel = new Label("Guest Frequency: " + userProfile.getGuests());
 
-		UserProfile sampleMatch = new UserProfile();
-		sampleMatch.login("SampleRoommate");
-		sampleMatch.setPreferences("late", "high", "often");
-
-		int score = MatchCalculator.calculateScore(userProfile, sampleMatch);
-
-		Label matchLabel = new Label("Recommended Match: " + sampleMatch.getUser());
-		// Max score = 35 (15 cleanliness + 10 sleep + 10 guests)
-		// Lowest possible score = -20, so shift by +20 before converting to percentage
-		int maxScore = 35;
-		int percentage = (int)(((double)(score + 20) / (maxScore + 20)) * 100);
-
-		Label scoreLabel = new Label("Compatibility Score: " + percentage + "%");
-
+		java.util.List<UserProfile> matches = controller.getMatches();
 		VBox infoBox = new VBox(10);
-		infoBox.getChildren().addAll(
-			welcomeLabel,
-			sleepLabel,
-			cleanlinessLabel,
-			guestsLabel,
-			matchLabel,
-			scoreLabel
-		);
+		infoBox.getChildren().addAll(welcomeLabel, sleepLabel, cleanlinessLabel, guestsLabel);
+
+		if (matches.isEmpty()) {
+			infoBox.getChildren().add(new Label("No matches found yet. Check back when more users have signed up."));
+		} else {
+			for (UserProfile match : matches) {
+				int score = MatchCalculator.calculateScore(userProfile, match);
+				int maxScore = 35;
+				int percentage = (int)(((double)(score + 20) / (maxScore + 20)) * 100);
+				Label matchLabel = new Label(match.getUser() + " - Compatibility: " + percentage + "%");
+				infoBox.getChildren().add(matchLabel);
+			}
+		}
 
 		this.setCenter(infoBox);
 	}
