@@ -54,7 +54,9 @@ public class RegisterPage {
 	private class RegisterHandler implements EventHandler<ActionEvent> {
 		@Override
 		public void handle(ActionEvent arg0) {
-			information.setText("Registration not yet implemented");
+			controller.register(usernameTextField.getText(), passwordTextField.getText());
+			information.setText("Account already exists");
+			passwordTextField.setText("");
 		}
 	}
 	
