@@ -52,7 +52,14 @@ public class DatabaseManager {
             }
         }
         
-        // Needs Salting and Hashing for security
+        // TODO Needs Salting and Hashing for security
+        /**
+         * Used to register a new user into the database. 
+         * Returns true if user was successfully added. 
+         * @param user - username
+         * @param pass - password
+         * @return true/false
+         */
         public boolean insert(String user, String pass) {
             String checkSql = "SELECT * FROM accounts WHERE name = ?";
             try (Connection connection = DriverManager.getConnection(URL);
@@ -82,6 +89,13 @@ public class DatabaseManager {
             return false;
         }
         
+        /**
+         * Validates user credentials and returns true if username and password 
+         * were inputed correctly. 
+         * @param user - username
+         * @param pass - password
+         * @return true/false
+         */
         public boolean isValid(String user, String pass) {
         	String sql = "SELECT * FROM accounts WHERE name = ?";
         	try (Connection connection = DriverManager.getConnection(URL);  
@@ -103,6 +117,11 @@ public class DatabaseManager {
         	return false;
         }
         
+        /**
+         * Returns id from account table of the specified user
+         * @param username
+         * @return database table id
+         */
 		public int getUserId(String username) {
 			String sql = "SELECT id FROM accounts WHERE name = ?";
 			try (Connection connection = DriverManager.getConnection(URL);
@@ -118,6 +137,14 @@ public class DatabaseManager {
 			return -1;
 		}
 
+		/**
+		 * Saves user preferences into the database. Adds a new preferences table 
+		 * if it doesn't already exist. 
+		 * @param userId - preferences table id to save to
+		 * @param sleep
+		 * @param cleanliness
+		 * @param guests
+		 */
 		public void savePreferences(int userId, String sleep, String cleanliness, String guests) {
 			String sql = "INSERT OR REPLACE INTO preferences (user_id, sleep_schedule, cleanliness, guests) "
 					+ "VALUES (?, ?, ?, ?)";
@@ -133,6 +160,11 @@ public class DatabaseManager {
 			}
 		}
 		
+		/**
+		 * Returns a list of the users preferences. 
+		 * @param userId - id of user in the preferences table
+		 * @return ArrayList
+		 */
 		public java.util.List<String> getPreferences(int userId) {
 			java.util.List<String> userPreferences = new java.util.ArrayList<>();
 			String sql = "SELECT * FROM preferences WHERE user_id='" + userId + "'";
@@ -152,6 +184,12 @@ public class DatabaseManager {
 		}
 
 		// For getting a list of everyone else's profiles except the user requesting a match, for comparing
+		/**
+		 * Gets and returns a list of all other user profiles that are not this user. 
+		 * <p>Used to create compatibility scoring for this user to other users</p>
+		 * @param excludeUserId - User id of this user
+		 * @return ArrayList
+		 */
 		public java.util.List<UserProfile> getAllProfilesExcept(int excludeUserId) {
 			java.util.List<UserProfile> profiles = new java.util.ArrayList<>();
 			String sql = "SELECT a.id, a.name, p.sleep_schedule, p.cleanliness, p.guests "
