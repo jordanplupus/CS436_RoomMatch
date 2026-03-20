@@ -74,7 +74,11 @@ public class PreferencePage {
 
             userProfile.setPreferences(sleep, clean, guest);
             controller.savePreferences(sleep, clean, guest);
-            controller.showMainPage();
+            
+            MainPageView mainPage = new MainPageView(userProfile, controller);
+            BorderPane window = mainPage.initializePanel();
+            controller.setToPage(window, 500, 400);
+            //controller.showMainPage();
         }
     }
 }

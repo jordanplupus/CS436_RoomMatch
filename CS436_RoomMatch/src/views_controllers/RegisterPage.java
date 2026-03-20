@@ -65,7 +65,7 @@ public class RegisterPage {
 		public void handle(ActionEvent arg0) {
 			LoginPage loginPage = new LoginPage(controller);
 			BorderPane window = loginPage.initializePanel();
-			controller.setToPage(window);
+			controller.setToPage(window, -1, -1);
 		}
 	}
 }

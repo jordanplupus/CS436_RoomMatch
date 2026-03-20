@@ -1,6 +1,6 @@
 package model;
 
-public class UserProfile extends Observable {
+public class UserProfile {
 	private boolean loggedIn = false;
 	private String username;
 	// prevent null issues

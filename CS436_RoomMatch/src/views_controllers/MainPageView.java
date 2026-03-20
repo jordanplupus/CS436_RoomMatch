@@ -7,17 +7,24 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import model.MatchCalculator;
-import model.Observer;
 import model.UserProfile;
 
-public class MainPageView extends BorderPane implements Observer {
+public class MainPageView {
+	RoomMatchGUI controller;
 	UserProfile userProfile;
 	
-	public void initializePanel(UserProfile user, RoomMatchGUI controller) {
+	public MainPageView(UserProfile user, RoomMatchGUI source) {
+		controller = source;
+		userProfile = user;
+	}
+	
+	public BorderPane initializePanel() {
+		BorderPane window = new BorderPane();
+		
+		/*
 		this.setTop(null);
 		this.setCenter(null);
-
-		userProfile = user;
+		*/
 
 		MenuItem option1 = new MenuItem("option1");
 		MenuItem option2 = new MenuItem("option2");
@@ -27,7 +34,7 @@ public class MainPageView extends BorderPane implements Observer {
 
 		MenuBar menuBar = new MenuBar();
 		menuBar.getMenus().addAll(options);
-		this.setTop(menuBar);
+		window.setTop(menuBar);
 		
 		Label welcomeLabel = new Label("Welcome " + userProfile.getUser());
 		Label sleepLabel = new Label("Sleep Schedule: " + userProfile.getSleepSchedule());
@@ -50,11 +57,8 @@ public class MainPageView extends BorderPane implements Observer {
 			}
 		}
 
-		this.setCenter(infoBox);
-	}
-
-	@Override
-	public void update(Object theObserved) {
+		window.setCenter(infoBox);
 		
+		return window;
 	}
 }

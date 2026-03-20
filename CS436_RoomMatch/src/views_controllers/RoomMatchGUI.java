@@ -1,11 +1,9 @@
 package views_controllers;
 
 import javafx.application.Application;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import model.Observer;
 import model.UserProfile;
 import model.DatabaseManager;
 
@@ -21,10 +19,6 @@ public class RoomMatchGUI extends Application {
 
 	private DatabaseManager db = new DatabaseManager();
 	private UserProfile userProfile;
-	private MainPageView mainPage = new MainPageView();
-	
-	private Observer currentView;
-	private Observer mainPageView;
 	
 	private BorderPane window;
 	private Stage stage;
@@ -46,9 +40,6 @@ public class RoomMatchGUI extends Application {
 		
 		userProfile = new UserProfile();
 		
-		mainPageView = mainPage;
-		userProfile.addObserver(mainPageView);
-		
 		LoginPage loginPage = new LoginPage(this);
 		window.setCenter(loginPage.initializePanel());
 		
@@ -56,10 +47,15 @@ public class RoomMatchGUI extends Application {
 		stage.show();
 	}
 	
-	public void setToPage(BorderPane page) {
+	public void setToPage(BorderPane page, int pageWidth, int pageHeight) {
+		if( pageWidth > 10 )
+			stage.setWidth(pageWidth);
+		if( pageHeight > 10 )
+			stage.setHeight(pageHeight);
 		window.setCenter(page);
 	}
 
+	/*
 	public void showMainPage() {
 		stage.setWidth(500);
 		stage.setHeight(400);
@@ -67,7 +63,7 @@ public class RoomMatchGUI extends Application {
 
 		mainPage.initializePanel(userProfile, this);
 		setViewTo(mainPageView);
-	}
+	}*/
 	
 	// Temporary login logic for Iteration 1 using hardcoded credentials.
 	// This will be replaced with SQLite-based authentication in future iterations.
@@ -79,7 +75,7 @@ public class RoomMatchGUI extends Application {
 			stage.setTitle("Set Preferences");
 			userProfile.login(username);
 			PreferencePage preferencePage = new PreferencePage(this, userProfile);
-			setToPage(preferencePage.initializePanel());
+			setToPage(preferencePage.initializePanel(), 500, 400);
 			return true;
 		}
 		return false;
@@ -95,16 +91,17 @@ public class RoomMatchGUI extends Application {
 			userProfile.login(username);
 
 			PreferencePage preferencePage = new PreferencePage(this, userProfile);
-			setToPage(preferencePage.initializePanel());
+			setToPage(preferencePage.initializePanel(), -1, -1);
 		}
 		
 	}
 	
+	/*
 	private void setViewTo(Observer newView) {
 		window.setCenter(null);
 		currentView = newView;
 		window.setCenter((Node) currentView);
-	}
+	}*/
 
 	public void savePreferences(String sleep, String cleanliness, String guests) {
 		db.savePreferences(currentUserId, sleep, cleanliness, guests);
