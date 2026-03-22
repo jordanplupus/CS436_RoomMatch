@@ -12,8 +12,11 @@ import javafx.scene.layout.GridPane;
 public class RegisterPage {
 	private TextField usernameTextField = new TextField();
 	private TextField passwordTextField = new TextField();
+	private TextField rePasswordTextField = new TextField();
 	private Label information = new Label("");
 	private RoomMatchGUI controller;
+	private String passwordInput = "";
+	private String confPasswordInput = "";
 	
 	public RegisterPage(RoomMatchGUI source) {
 		controller = source;
@@ -23,6 +26,7 @@ public class RegisterPage {
 		BorderPane window = new BorderPane();
 		Label username = new Label("Enter Username");
 		Label password = new Label("Enter Password");
+		Label repassword = new Label("Confirm Password");
 		Button register = new Button("Register");
 		Button prevPage = new Button("Cancel");
 		GridPane grid = new GridPane();
@@ -34,8 +38,10 @@ public class RegisterPage {
 		grid.add(usernameTextField, 1, 0);
 		grid.add(password, 0, 1);
 		grid.add(passwordTextField, 1, 1);
-		grid.add(register, 1, 2);
-		grid.add(prevPage, 1, 3);
+		grid.add(repassword, 0, 2);
+		grid.add(rePasswordTextField, 1, 2);
+		grid.add(register, 1, 3);
+		grid.add(prevPage, 1, 4);
 		
 		window.setTop(grid);
 		window.setCenter(information);
@@ -45,6 +51,27 @@ public class RegisterPage {
 		usernameTextField.setOnAction(handleRegistration);
 		passwordTextField.setOnAction(handleRegistration);
 		
+		passwordTextField.textProperty().addListener((observable, oldValue, newValue) -> {			
+			// Mask the textField with '*' characters
+			if( oldValue.length() < newValue.length() ) {
+				passwordInput += "" + newValue.charAt(newValue.length() - 1);
+				passwordTextField.setText(newValue.substring(0, newValue.length()-1) + "*");	// will call this function again
+			}
+			else if( oldValue.length() > newValue.length() ){ // on backspace entered
+				passwordInput = passwordInput.substring(0, passwordInput.length()-1);
+			}
+		});
+		rePasswordTextField.textProperty().addListener((observable, oldValue, newValue) -> {			
+			// Mask the textField with '*' characters
+			if( oldValue.length() < newValue.length() ) {
+				confPasswordInput += "" + newValue.charAt(newValue.length() - 1);
+				rePasswordTextField.setText(newValue.substring(0, newValue.length()-1) + "*");	// will call this function again
+			}
+			else if( oldValue.length() > newValue.length() ){ // on backspace entered
+				confPasswordInput = confPasswordInput.substring(0, confPasswordInput.length()-1);
+			}
+		});
+		
 		EventHandler<ActionEvent> returnToLogin = new ReturnHandler();
 		prevPage.setOnAction(returnToLogin);
 		
@@ -53,10 +80,22 @@ public class RegisterPage {
 	
 	private class RegisterHandler implements EventHandler<ActionEvent> {
 		@Override
-		public void handle(ActionEvent arg0) {
-			controller.register(usernameTextField.getText(), passwordTextField.getText());
+		public void handle(ActionEvent arg0) {			
+			if( !passwordInput.equals(confPasswordInput) ) {
+				information.setText("Passwords do not match");
+				passwordTextField.setText("");
+				passwordInput = "";
+				rePasswordTextField.setText("");
+				confPasswordInput = "";
+				return;
+			}
+			
+			controller.register(usernameTextField.getText(), passwordInput);
 			information.setText("Account already exists");
 			passwordTextField.setText("");
+			passwordInput = "";
+			rePasswordTextField.setText("");
+			confPasswordInput = "";
 		}
 	}
 	

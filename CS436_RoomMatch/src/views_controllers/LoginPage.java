@@ -12,6 +12,7 @@ import javafx.scene.layout.GridPane;
 public class LoginPage {
 	private TextField usernameTextField = new TextField();
 	private TextField passwordTextField = new TextField();
+	private String passwordInput = "";
 	private Label information = new Label("");
 	private RoomMatchGUI controller;
 
@@ -46,6 +47,22 @@ public class LoginPage {
 		usernameTextField.setOnAction(handleLogin);
 		passwordTextField.setOnAction(handleLogin);
 		
+		// this lambda function is called when the text field changes. 
+		// observable = text field being observed
+		// https://docs.oracle.com/javafx/2/api/javafx/scene/control/TextInputControl.TextProperty.html
+		passwordTextField.textProperty().addListener((observable, oldValue, newValue) -> {			
+			// Mask the textField with '*' characters
+			if( oldValue.length() < newValue.length() ) {
+				passwordInput += "" + newValue.charAt(newValue.length() - 1);
+				passwordTextField.setText(newValue.substring(0, newValue.length()-1) + "*");	// will call this function again
+			}
+			else if( oldValue.length() > newValue.length() ){ // on backspace entered
+				passwordInput = passwordInput.substring(0, passwordInput.length()-1);
+			}
+			
+			//System.out.println("passwordTextField changed from " + oldValue + " to " + newValue);
+		});
+		
 		EventHandler<ActionEvent> handleRegistration = new RegisterHandler();
 		register.setOnAction(handleRegistration);
 		
@@ -58,13 +75,14 @@ public class LoginPage {
 		public void handle(ActionEvent arg0) {
 			boolean success = controller.attemptLogin(
 				usernameTextField.getText(),
-				passwordTextField.getText()
+				passwordInput
 			);
 
 			if (!success) {
 				information.setText("Invalid username or password, please try again\n"
 						+ "Login attempts: " + ++counter);
 				passwordTextField.setText("");
+				passwordInput = "";
 			}
 		}
 	}

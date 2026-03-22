@@ -57,16 +57,6 @@ public class RoomMatchGUI extends Application {
 			stage.setHeight(pageHeight);
 		window.setCenter(page);
 	}
-
-	/*
-	public void showMainPage() {
-		stage.setWidth(500);
-		stage.setHeight(400);
-		stage.setTitle("User Profile");
-
-		mainPage.initializePanel(userProfile, this);
-		setViewTo(mainPageView);
-	}*/
 	
 	// Temporary login logic for Iteration 1 using hardcoded credentials.
 	// This will be replaced with SQLite-based authentication in future iterations.
@@ -91,6 +81,11 @@ public class RoomMatchGUI extends Application {
 		return false;
 	}
 	
+	void logout() {
+		currentUserId = -1;
+		userProfile.logout();
+	}
+	
 	void register(String username, String password) {
 		if (db.insert(username, password)) {
 			currentUserId = db.getUserId(username);
@@ -102,17 +97,10 @@ public class RoomMatchGUI extends Application {
 			
 			PreferencePage preferencePage = new PreferencePage(this, userProfile);
 			setToPage(preferencePage.initializePanel(), -1, -1);
-			
+
 		}
 		
 	}
-	
-	/*
-	private void setViewTo(Observer newView) {
-		window.setCenter(null);
-		currentView = newView;
-		window.setCenter((Node) currentView);
-	}*/
 
 	public void savePreferences(String sleep, String cleanliness, String guests) {
 		db.savePreferences(currentUserId, sleep, cleanliness, guests);
@@ -129,5 +117,9 @@ public class RoomMatchGUI extends Application {
 
 	public int getCurrentUserId() {
 		return currentUserId;
+	}
+	
+	void deleteAccount() {
+		db.delete(currentUserId);
 	}
 }

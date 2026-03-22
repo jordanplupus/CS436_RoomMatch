@@ -26,13 +26,19 @@ public class MainPageView {
 		controller.getPreferences();
 
 		MenuItem option1 = new MenuItem("set preferences");
-		MenuItem option2 = new MenuItem("option2");
-		MenuItem option3 = new MenuItem("option3");
+		MenuItem option2 = new MenuItem("delete account");
+		MenuItem option3 = new MenuItem("logout");
 		Menu options = new Menu("Options");
 		options.getItems().addAll(option1, option2, option3);
 		
 		EventHandler<ActionEvent> preferencesOption = new HandleSetPreferencesOption();
 		option1.setOnAction(preferencesOption);
+		
+		EventHandler<ActionEvent> deleteAccountOption = new DeleteAccountOption();
+		option2.setOnAction(deleteAccountOption);
+		
+		EventHandler<ActionEvent> logoutOption = new LogoutOption();
+		option3.setOnAction(logoutOption);
 
 		MenuBar menuBar = new MenuBar();
 		menuBar.getMenus().addAll(options);
@@ -71,5 +77,26 @@ public class MainPageView {
 			BorderPane window = preferencePage.initializePanel();
 			controller.setToPage(window, 500, 400);
 		}
+	}
+	
+	private class DeleteAccountOption implements EventHandler<ActionEvent> {
+		@Override
+		public void handle(ActionEvent arg0) {
+			controller.deleteAccount();
+			logout();
+		}
+	}
+	
+	private class LogoutOption implements EventHandler<ActionEvent> {
+		@Override
+		public void handle(ActionEvent arg0) {
+			logout();
+		}
+	}
+	
+	private void logout() {
+		controller.logout();
+		LoginPage loginPage = new LoginPage(controller);
+		controller.setToPage(loginPage.initializePanel(), 300, 200);
 	}
 }
