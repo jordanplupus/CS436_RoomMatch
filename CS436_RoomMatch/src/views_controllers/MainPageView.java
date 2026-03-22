@@ -1,7 +1,10 @@
 package views_controllers;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import java.util.Optional;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -31,14 +34,25 @@ public class MainPageView {
 		Menu options = new Menu("Options");
 		options.getItems().addAll(option1, option2, option3);
 		
-		EventHandler<ActionEvent> preferencesOption = new HandleSetPreferencesOption();
-		option1.setOnAction(preferencesOption);
+		option1.setOnAction((event) -> {
+			PreferencePage preferencePage = new PreferencePage(controller, userProfile);
+			controller.setToPage(preferencePage.initializePanel(), 500, 400);
+		});
 		
-		EventHandler<ActionEvent> deleteAccountOption = new DeleteAccountOption();
-		option2.setOnAction(deleteAccountOption);
+		option2.setOnAction((event) -> {
+			Alert alert = new Alert(AlertType.WARNING, 
+					"Are you sure you want to delete your account?\nThis action cannot be undone.", 
+					ButtonType.YES, ButtonType.CANCEL);
+			Optional<ButtonType> result = alert.showAndWait();
+			if( result.get() == ButtonType.YES ) {
+				controller.deleteAccount();
+				logout();
+			}
+		});
 		
-		EventHandler<ActionEvent> logoutOption = new LogoutOption();
-		option3.setOnAction(logoutOption);
+		option3.setOnAction((event) -> {
+			logout();
+		});
 
 		MenuBar menuBar = new MenuBar();
 		menuBar.getMenus().addAll(options);
@@ -68,30 +82,6 @@ public class MainPageView {
 		window.setCenter(infoBox);
 		
 		return window;
-	}
-	
-	private class HandleSetPreferencesOption implements EventHandler<ActionEvent> {
-		@Override
-		public void handle(ActionEvent arg0) {
-			PreferencePage preferencePage = new PreferencePage(controller, userProfile);
-			BorderPane window = preferencePage.initializePanel();
-			controller.setToPage(window, 500, 400);
-		}
-	}
-	
-	private class DeleteAccountOption implements EventHandler<ActionEvent> {
-		@Override
-		public void handle(ActionEvent arg0) {
-			controller.deleteAccount();
-			logout();
-		}
-	}
-	
-	private class LogoutOption implements EventHandler<ActionEvent> {
-		@Override
-		public void handle(ActionEvent arg0) {
-			logout();
-		}
 	}
 	
 	private void logout() {
