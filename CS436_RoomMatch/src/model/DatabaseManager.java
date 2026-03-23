@@ -1,6 +1,8 @@
 package model;
 
 import java.sql.*;
+import java.util.Comparator;
+import java.util.Collections;
 
 public class DatabaseManager {
         final private String URL = "jdbc:sqlite:my.db";
@@ -214,8 +216,71 @@ public class DatabaseManager {
 			} catch (SQLException e) {
 				System.err.println(e.getMessage());
 			}
+			
 			return profiles;
 		}
+		
+		// Helper function for getting a profile based on user's ID
+		/**
+		 * Creates a UserProfile based on the found data when using user's ID
+		 * @param userID - id of user in the accounts and preferences table
+         * @return UserProfile
+		 */
+		private UserProfile getProfile(int userID) {
+			String sql = "SELECT name FROM accounts WHERE id = ?";
+			UserProfile result = new UserProfile();
+			try (Connection connection = DriverManager.getConnection(URL);
+				PreparedStatement pstmt = connection.prepareStatement(sql)) {
+				pstmt.setInt(1, userID);
+				ResultSet rs = pstmt.executeQuery();
+				if (rs.next()) {
+					result.login(rs.getString("name"));
+					result.setPreferences(this.getPreferences(userID));
+				}
+			} catch (SQLException e) {
+				System.err.println(e.getMessage());
+			}
+			return result;
+		}
+		
+		// For getting a list of everyone else's profiles except the user requesting a match, and sorts the list in descending order
+		/**
+		 * Gets and returns a list of all other user profiles that are not this user and their compatability. 
+		 * <p>Used to create compatibility scoring for this user to other users</p>
+		 * @param excludeUserId - User id of this user
+		 * @return ArrayList
+		 */
+		public java.util.List<SortProfiles> getAllMatches(int excludeUserId) {
+			UserProfile currProfile = getProfile(excludeUserId);
+			java.util.List<SortProfiles> profiles = new java.util.ArrayList<>();
+			java.util.List<String> userPreferences = this.getPreferences(excludeUserId);
+			String sql = "SELECT a.id, a.name, p.sleep_schedule, p.cleanliness, p.guests "
+					+ "FROM accounts a "
+					+ "JOIN preferences p ON a.id = p.user_id "
+					+ "WHERE a.id != ?";
+			try (Connection connection = DriverManager.getConnection(URL);
+				PreparedStatement pstmt = connection.prepareStatement(sql)) {
+				pstmt.setInt(1, excludeUserId);
+				ResultSet rs = pstmt.executeQuery();
+				while (rs.next()) {
+					UserProfile profile = new UserProfile();
+					profile.login(rs.getString("name"));
+					profile.setPreferences(
+						rs.getString("sleep_schedule"),
+						rs.getString("cleanliness"),
+						rs.getString("guests")
+					);
+					SortProfiles sProfile = new SortProfiles(currProfile, profile);
+					profiles.add(sProfile);
+				}
+			} catch (SQLException e) {
+				System.err.println(e.getMessage());
+			}
+			Comparator myComparator = new SortByCompatabilty();
+			Collections.sort(profiles, myComparator);
+			return profiles;
+		}
+		
 		
 		// Just to see the data in our db
 		public void printAllData() {

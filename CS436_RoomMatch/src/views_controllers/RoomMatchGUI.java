@@ -111,8 +111,8 @@ public class RoomMatchGUI extends Application {
 		userProfile.setPreferences(preferences);
 	}
 	
-	public java.util.List<model.UserProfile> getMatches() {
-    	return db.getAllProfilesExcept(currentUserId);
+	public java.util.List<model.SortProfiles> getMatches() {
+    	return db.getAllMatches(currentUserId);
 	}
 
 	public int getCurrentUserId() {

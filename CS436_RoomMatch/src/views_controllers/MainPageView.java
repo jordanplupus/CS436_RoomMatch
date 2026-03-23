@@ -1,5 +1,6 @@
 package views_controllers;
 
+import java.util.Comparator;
 import java.util.Optional;
 
 import javafx.scene.control.Alert;
@@ -12,6 +13,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import model.MatchCalculator;
+import model.SortProfiles;
 import model.UserProfile;
 
 public class MainPageView {
@@ -63,18 +65,19 @@ public class MainPageView {
 		Label cleanlinessLabel = new Label("Cleanliness: " + userProfile.getCleanliness());
 		Label guestsLabel = new Label("Guest Frequency: " + userProfile.getGuests());
 
-		java.util.List<UserProfile> matches = controller.getMatches();
+		java.util.List<SortProfiles> matches = controller.getMatches();
+	
 		VBox infoBox = new VBox(10);
 		infoBox.getChildren().addAll(welcomeLabel, sleepLabel, cleanlinessLabel, guestsLabel);
 
 		if (matches.isEmpty()) {
 			infoBox.getChildren().add(new Label("No matches found yet. Check back when more users have signed up."));
 		} else {
-			for (UserProfile match : matches) {
-				int score = MatchCalculator.calculateScore(userProfile, match);
+			for (SortProfiles match : matches) {
+				int score = match.getScore();//MatchCalculator.calculateScore(userProfile, match);
 				int maxScore = 35;
 				int percentage = (int)(((double)(score + 20) / (maxScore + 20)) * 100);
-				Label matchLabel = new Label(match.getUser() + " - Compatibility: " + percentage + "%");
+				Label matchLabel = new Label(match.getOtherUser() + " - Compatibility: " + percentage + "%");
 				infoBox.getChildren().add(matchLabel);
 			}
 		}
