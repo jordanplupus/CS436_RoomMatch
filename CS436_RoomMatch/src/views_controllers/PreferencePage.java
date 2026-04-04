@@ -27,10 +27,10 @@ public class PreferencePage {
     BorderPane initializePanel() {
         BorderPane window = new BorderPane();
 
-        Label title = new Label("Select Your Roommate Preferences");
-        Label sleepLabel = new Label("Sleep Schedule");
-        Label cleanLabel = new Label("Cleanliness");
-        Label guestLabel = new Label("Guest Frequency");
+        Label title = new Label("Tell Us About Your Living Habits");
+        Label sleepLabel = new Label("Your Sleep Schedule");
+        Label cleanLabel = new Label("Your Cleanliness Level");
+        Label guestLabel = new Label("How Often You Have Guests");
 
         sleepBox.getItems().addAll("early", "late");
         cleanBox.getItems().addAll("low", "medium", "high");

@@ -3,17 +3,21 @@ import java.util.Comparator;
 
 public class SortProfiles {
 	private UserProfile currProfile;
-	private String otherUser;
+	private UserProfile otherProfile;
 	private int score;
 	
 	public SortProfiles(UserProfile curr, UserProfile other) {
 		currProfile = curr;
+		otherProfile = other;
 		score = MatchCalculator.calculateScore(curr, other);
-		otherUser = other.getUser();
 	}
 	
 	public UserProfile getUserProfile() {
 		return currProfile;
+	}
+	
+	public UserProfile getOtherProfile() {
+		return otherProfile;
 	}
 	
 	public int getScore() {
@@ -21,17 +25,13 @@ public class SortProfiles {
 	}
 	
 	public String getOtherUser() {
-		return otherUser;
+		return otherProfile.getUser();
 	}
 }
 
-class SortByCompatabilty implements Comparator {
-	
+class SortByCompatabilty implements Comparator<SortProfiles> {
 	@Override
-	public int compare(Object o1, Object o2) {
-		SortProfiles curr = (SortProfiles) o1;
-		SortProfiles other = (SortProfiles) o2;
-		
+	public int compare(SortProfiles curr, SortProfiles other) {
 		if (curr.getScore() > other.getScore()) {
 			return -1;
 		} else if (curr.getScore() < other.getScore()) {
@@ -39,5 +39,4 @@ class SortByCompatabilty implements Comparator {
 		}
 		return 0;
 	}
-
 }
