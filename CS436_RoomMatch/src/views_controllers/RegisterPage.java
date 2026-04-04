@@ -80,7 +80,7 @@ public class RegisterPage {
 	
 	private class RegisterHandler implements EventHandler<ActionEvent> {
 		@Override
-		public void handle(ActionEvent arg0) {			
+		public void handle(ActionEvent arg0) {
 			if( !passwordInput.equals(confPasswordInput) ) {
 				information.setText("Passwords do not match");
 				passwordTextField.setText("");
@@ -90,8 +90,12 @@ public class RegisterPage {
 				return;
 			}
 			
-			controller.register(usernameTextField.getText(), passwordInput);
-			information.setText("Account already exists");
+			boolean success = controller.register(usernameTextField.getText(), passwordInput);
+
+			if (!success) {
+				information.setText("Account already exists");
+			}
+
 			passwordTextField.setText("");
 			passwordInput = "";
 			rePasswordTextField.setText("");

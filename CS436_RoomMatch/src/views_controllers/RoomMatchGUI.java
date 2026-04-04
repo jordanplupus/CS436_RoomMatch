@@ -4,8 +4,8 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import model.UserProfile;
 import model.DatabaseManager;
+import model.UserProfile;
 
 /**
  * <p>Main is contained in this method.</p>
@@ -86,7 +86,7 @@ public class RoomMatchGUI extends Application {
 		userProfile.logout();
 	}
 	
-	void register(String username, String password) {
+	boolean register(String username, String password) {
 		if (db.insert(username, password)) {
 			currentUserId = db.getUserId(username);
 			stage.setWidth(500);
@@ -97,9 +97,9 @@ public class RoomMatchGUI extends Application {
 			
 			PreferencePage preferencePage = new PreferencePage(this, userProfile);
 			setToPage(preferencePage.initializePanel(), -1, -1);
-
+			return true;
 		}
-		
+		return false;
 	}
 
 	public void savePreferences(String sleep, String cleanliness, String guests) {
