@@ -34,7 +34,7 @@ public class RoomMatchGUI extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-
+		
 		// Initialize database
 		db.init();
 		// Add admin account
@@ -42,6 +42,10 @@ public class RoomMatchGUI extends Application {
 		// Show what's in the db
 		db.printAllData();
 
+		
+		//db.addPreferenceEntry("major");
+		//db.removePreferenceEntry("major");
+		
 		this.stage = stage;
 		stage.setTitle("Login");
 		window = new BorderPane();
@@ -55,6 +59,10 @@ public class RoomMatchGUI extends Application {
 		loginPage.setMainController(this);
 		window.setCenter(root);
 
+
+		userProfile.verifyPreferenceCount(db.getPreferenceTableEntryCount() - 1);
+	
+		
 		stage.setScene(scene);
 		stage.show();
 	}
@@ -70,6 +78,14 @@ public class RoomMatchGUI extends Application {
 	public void setToPage(String fxml, String title) throws IOException {
 		loader = new FXMLLoader(getClass().getResource(fxml));
 		root = loader.load();
+		
+		Object controller = loader.getController();
+		
+		if (controller instanceof LoginPage) {
+			((LoginPage) controller).setMainController(this);
+		} else if (controller instanceof MainPageView) {
+			((MainPageView) controller).setMainController(this, userProfile);
+		}
 		stage.setTitle(title);
 		window.setCenter(root);
 		stage.sizeToScene();

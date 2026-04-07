@@ -54,7 +54,6 @@ public class MainPageView {
 
 	public void setInfo() throws IOException {
 		controller.getPreferences();
-		System.out.println(userProfile.getCleanliness());
 		welcomeLabel.setText("Welcome " + userProfile.getUser() + "!");
 		sleepLabel.setText("Your Sleep Schedule: " + userProfile.getSleepSchedule());
 		cleanlinessLabel.setText("Your Cleanliness: " + userProfile.getCleanliness());

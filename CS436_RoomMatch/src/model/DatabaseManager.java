@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.Comparator;
 import java.util.Collections;
 
+// TODO: The database should only be able to be accessed by an admin account. 
 public class DatabaseManager {
         final private String URL = "jdbc:sqlite:my.db";
         
@@ -28,6 +29,69 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
+        }
+        
+        // If this application is made public in the future then removing and re-adding 
+        // the preferences table with new entries every time we make a new preference 
+        // would be unrealistic. 
+        // Every user would have to fill out their preferences all over again. 
+        // So these two below methods are thus necessary.
+        /**
+         * Adds a column entry to the preferences table. 
+         * @param columnName - name of the preference column to add
+         */
+        public void addPreferenceEntry(String columnName) {
+        	String sql = "ALTER TABLE preferences "
+        			   + "ADD " + columnName + " TEXT";
+        	
+        	try (Connection connection = DriverManager.getConnection(URL);
+        		 PreparedStatement stmt = connection.prepareStatement(sql)) {
+        		stmt.executeUpdate();
+        		System.out.println("Added new table entry '" + columnName + "' to preferences");
+		    } catch (SQLException e) {
+		    	if( e.getMessage().substring(46, 67).equals("duplicate column name") ) 
+		    		System.out.println("Table entry '" + columnName + "' already exists");
+		    	else System.err.println(e.getMessage());
+		    }
+        }
+        
+        /**
+         * Removes a column entry from the preferences table. 
+         * @param columnName - name of the preference column to remove
+         */
+        public void removePreferenceEntry(String columnName) {
+        	String sql = "ALTER TABLE preferences "
+        			+ "DROP COLUMN " + columnName;
+        	
+        	try (Connection connection = DriverManager.getConnection(URL);
+        		 PreparedStatement stmt = connection.prepareStatement(sql)) {
+        		stmt.executeUpdate();
+        	} catch (SQLException e) {
+        		if( e.getMessage().substring(46, 60).equals("no such column") ) 
+        			System.out.println("No column named " + columnName + " exists in the table");
+        		else System.err.println(e.getMessage());
+        	}
+        }
+        
+        /**
+         * Used to verify that the amount of preference entries matches entries in other
+         * java classes. 
+         * @return count of columns in preferences table
+         */
+        public int getPreferenceTableEntryCount() {
+        	String sql = "SELECT COUNT(*) FROM pragma_table_info('preferences')";
+        	
+        	int count = -1;
+        	
+        	try (Connection connection = DriverManager.getConnection(URL);
+           		 PreparedStatement stmt = connection.prepareStatement(sql)) {
+           		ResultSet rs = stmt.executeQuery();
+           		count = rs.getInt(1);
+           	} catch (SQLException e) {
+           		System.err.println(e.getMessage());
+           	}
+        	
+        	return count;
         }
         
         //temp delete function
@@ -253,7 +317,7 @@ public class DatabaseManager {
 		public java.util.List<SortProfiles> getAllMatches(int excludeUserId) {
 			UserProfile currProfile = getProfile(excludeUserId);
 			java.util.List<SortProfiles> profiles = new java.util.ArrayList<>();
-			java.util.List<String> userPreferences = this.getPreferences(excludeUserId);
+			//java.util.List<String> userPreferences = this.getPreferences(excludeUserId);
 			String sql = "SELECT a.id, a.name, p.sleep_schedule, p.cleanliness, p.guests "
 					+ "FROM accounts a "
 					+ "JOIN preferences p ON a.id = p.user_id "
