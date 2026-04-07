@@ -63,7 +63,7 @@ public class PreferencePage {
     }
     
     private void fillWithSavedValues() {
-    	String[] preferences = userProfile.getPreferenceValues();
+    	String[] preferences = userProfile.getPreferencesAsArray();
     	
     	sleepBox.setValue(preferences[0]);
     	cleanBox.setValue(preferences[1]);

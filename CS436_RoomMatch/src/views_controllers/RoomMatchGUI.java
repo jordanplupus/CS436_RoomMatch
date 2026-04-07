@@ -25,8 +25,6 @@ public class RoomMatchGUI extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		
-		
 		//Initialize database
 		db.init();
 		// Add admin account
@@ -34,7 +32,8 @@ public class RoomMatchGUI extends Application {
 		// Show what's in the db
 		db.printAllData();
 		
-		
+		//db.addPreferenceEntry("major");
+		//db.removePreferenceEntry("major");
 		
 		this.stage = stage;
 		stage.setTitle("Login");
@@ -42,6 +41,7 @@ public class RoomMatchGUI extends Application {
 		Scene scene = new Scene(window, 300, 200);
 		
 		userProfile = new UserProfile();
+		userProfile.verifyPreferenceCount(db.getPreferenceTableEntryCount() - 1);
 		
 		LoginPage loginPage = new LoginPage(this);
 		window.setCenter(loginPage.initializePanel());
