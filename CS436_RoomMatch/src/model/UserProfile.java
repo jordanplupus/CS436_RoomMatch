@@ -3,7 +3,8 @@ package model;
 public class UserProfile {
 	private boolean loggedIn = false;
 	private String username;
-	// prevent null issues
+	
+	private final int preferenceCount = 3;
 	private String sleepSchedule = "";
 	private String cleanliness = "";
 	private String guests = "";
@@ -18,6 +19,10 @@ public class UserProfile {
 		sleepSchedule = preferences.get(0);
 		cleanliness = preferences.get(1);
 		guests = preferences.get(2);
+	}
+	
+	public int getPreferenceCount() {
+		return preferenceCount;
 	}
 	
 	public String getSleepSchedule() {
@@ -60,7 +65,7 @@ public class UserProfile {
 		return null;
 	}
 	
-	public String[] getPreferenceValues() {
+	public String[] getPreferencesAsArray() {
 		String arr[] = new String[3];
 		
 		arr[0] = sleepSchedule;
@@ -68,6 +73,15 @@ public class UserProfile {
 		arr[2] = guests;
 		
 		return arr;
+	}
+	
+	public void verifyPreferenceCount(int shouldBe) {
+		if( preferenceCount > shouldBe ) {
+			throw new IllegalArgumentException("There are more preferences in 'UserProfile.java' than exist in the database");
+		}
+		if( preferenceCount < shouldBe ) {
+			throw new IllegalArgumentException("There are more preferences in the database than exist in 'UserProfile'");
+		}
 	}
 
 	// for debugging
