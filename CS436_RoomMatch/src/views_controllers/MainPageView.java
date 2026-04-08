@@ -30,6 +30,7 @@ public class MainPageView {
 		BorderPane window = new BorderPane();
 		
 		controller.getPreferences();
+		controller.loadDealbreakers();
 
 		MenuItem option1 = new MenuItem("set preferences");
 		MenuItem option2 = new MenuItem("delete account");
@@ -62,9 +63,19 @@ public class MainPageView {
 		window.setTop(menuBar);
 		
 		Label welcomeLabel = new Label("Welcome " + userProfile.getUser());
-		Label sleepLabel = new Label("Your Sleep Schedule: " + userProfile.getSleepSchedule());
-		Label cleanlinessLabel = new Label("Your Cleanliness: " + userProfile.getCleanliness());
-		Label guestsLabel = new Label("Your Guest Frequency: " + userProfile.getGuests());
+		
+		String sleepText = "Your Sleep Schedule: " + userProfile.getSleepSchedule();
+		if (userProfile.isSleepDealbreaker()) sleepText += " (deal-breaker)";
+		Label sleepLabel = new Label(sleepText);
+
+		String cleanText = "Your Cleanliness: " + userProfile.getCleanliness();
+		if (userProfile.isCleanlinessDealbreaker()) cleanText += " (deal-breaker)";
+		Label cleanlinessLabel = new Label(cleanText);
+
+		String guestText = "Your Guest Frequency: " + userProfile.getGuests();
+		if (userProfile.isGuestsDealbreaker()) guestText += " (deal-breaker)";
+		Label guestsLabel = new Label(guestText);
+		
 		Label matchesTitle = new Label("Your Matches");
 
 		VBox infoBox = new VBox(10);
@@ -82,8 +93,7 @@ public class MainPageView {
 
 		if (matches.isEmpty()) {
 			infoBox.getChildren().add(
-				new Label("No matches found yet. Check back when more users have signed up.")
-			);
+				new Label("No matches found. Try adjusting your deal-breakers or check back when more users\n have signed up.")			);
 		} else {
 			for (SortProfiles match : matches) {
 				VBox matchCard = buildMatchCard(match);

@@ -8,6 +8,9 @@ public class UserProfile {
 	private String sleepSchedule = "";
 	private String cleanliness = "";
 	private String guests = "";
+	private boolean sleepDealbreaker = false;
+	private boolean cleanlinessDealbreaker = false;
+	private boolean guestsDealbreaker = false;
 	
 	public void setPreferences(String sleep, String clean, String guest) {
 	    sleepSchedule = sleep;
@@ -31,6 +34,24 @@ public class UserProfile {
 	
 	public String getCleanliness() {
 		return cleanliness != null ? cleanliness : "null";
+	}
+	
+	public void setDealbreakers(boolean sleep, boolean clean, boolean guests) {
+	    sleepDealbreaker = sleep;
+	    cleanlinessDealbreaker = clean;
+	    guestsDealbreaker = guests;
+	}
+
+	public boolean isSleepDealbreaker() {
+	    return sleepDealbreaker;
+	}
+
+	public boolean isCleanlinessDealbreaker() {
+	    return cleanlinessDealbreaker;
+	}
+
+	public boolean isGuestsDealbreaker() {
+	    return guestsDealbreaker;
 	}
 	
 	public String getGuests() {

@@ -69,6 +69,7 @@ public class RoomMatchGUI extends Application {
 			userProfile.login(username);
 			
 			if (!db.getPreferences(currentUserId).isEmpty()) {
+				loadDealbreakers();
 				MainPageView mainPage = new MainPageView(this, userProfile);
 				setToPage(mainPage.initializePanel(), 500, 400);
 			} else {
@@ -109,6 +110,15 @@ public class RoomMatchGUI extends Application {
 	public void getPreferences() {
 		java.util.List<String> preferences = db.getPreferences(currentUserId);
 		userProfile.setPreferences(preferences);
+	}
+	
+	public void saveDealbreakers(boolean sleep, boolean cleanliness, boolean guests) {
+	    db.saveDealbreakers(currentUserId, sleep, cleanliness, guests);
+	}
+
+	public void loadDealbreakers() {
+	    boolean[] dbs = db.getDealbreakers(currentUserId);
+	    userProfile.setDealbreakers(dbs[0], dbs[1], dbs[2]);
 	}
 	
 	public java.util.List<model.SortProfiles> getMatches() {
