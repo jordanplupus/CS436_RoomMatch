@@ -21,10 +21,18 @@ public class DatabaseManager {
 						+ "guests TEXT,"
 						+ "FOREIGN KEY (user_id) REFERENCES accounts(id)"
 						+ ");";
+			String sql3 = "CREATE TABLE IF NOT EXISTS dealbreakers ("
+			            + "user_id INTEGER PRIMARY KEY,"
+			            + "sleep_schedule INTEGER DEFAULT 0,"
+			            + "cleanliness INTEGER DEFAULT 0,"
+			            + "guests INTEGER DEFAULT 0,"
+			            + "FOREIGN KEY (user_id) REFERENCES accounts(id)"
+			            + ");";
         	try (Connection connection = DriverManager.getConnection(URL); 
         		 Statement stmnt = connection.createStatement()) {
                 stmnt.execute(sql1);
 				stmnt.execute(sql2);
+				stmnt.execute(sql3);
                 System.out.println("Connection successful");
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
@@ -98,18 +106,22 @@ public class DatabaseManager {
         public void delete(int userID) {
         	String sql1 = "DELETE FROM accounts WHERE id = ?";
         	String sql2 = "DELETE FROM preferences WHERE user_id = ?";
+        	String sql3 = "DELETE FROM dealbreakers WHERE user_id = ?";
 
             try (Connection conn = DriverManager.getConnection(URL);
-                 PreparedStatement pstmt1 = conn.prepareStatement(sql1);
-            	 PreparedStatement pstmt2 = conn.prepareStatement(sql2)) {
+            		PreparedStatement pstmt1 = conn.prepareStatement(sql1);
+            		PreparedStatement pstmt2 = conn.prepareStatement(sql2);
+            		PreparedStatement pstmt3 = conn.prepareStatement(sql3);) {
 
                 // Set the parameter for the WHERE clause
                 pstmt1.setInt(1, userID);
                 pstmt2.setInt(1, userID);
+                pstmt3.setInt(1, userID);
 
                 // Execute the DELETE statement
                 pstmt1.executeUpdate();
                 pstmt2.executeUpdate();
+                pstmt3.executeUpdate();
 
                 System.out.println("User " + userID + " Deleted");
 
@@ -249,6 +261,55 @@ public class DatabaseManager {
 			
 			return userPreferences;
 		}
+		
+		/**
+		 * Saves deal-breaker settings for a user. Each preference can be marked
+		 * as a deal-breaker (true) or flexible (false). Deal-breakers are stored
+		 * as 1 or 0 in the database.
+		 * @param userId - id of user in the accounts table
+		 * @param sleep - true if sleep schedule is a deal-breaker
+		 * @param cleanliness - true if cleanliness is a deal-breaker
+		 * @param guests - true if guest frequency is a deal-breaker
+		 */
+		public void saveDealbreakers(int userId, boolean sleep, boolean cleanliness, boolean guests) {
+		    String sql = "INSERT OR REPLACE INTO dealbreakers (user_id, sleep_schedule, cleanliness, guests) "
+		            + "VALUES (?, ?, ?, ?)";
+		    try (Connection connection = DriverManager.getConnection(URL);
+		        PreparedStatement pstmt = connection.prepareStatement(sql)) {
+		        pstmt.setInt(1, userId);
+		        pstmt.setInt(2, sleep ? 1 : 0);
+		        pstmt.setInt(3, cleanliness ? 1 : 0);
+		        pstmt.setInt(4, guests ? 1 : 0);
+		        pstmt.executeUpdate();
+		    } catch (SQLException e) {
+		        System.err.println(e.getMessage());
+		    }
+		}
+
+		/**
+		 * Returns deal-breaker settings for a user as a boolean array.
+		 * Index 0 = sleep schedule, 1 = cleanliness, 2 = guests.
+		 * Defaults to all false if no row exists for the user.
+		 * @param userId - id of user in the accounts table
+		 * @return boolean array of length 3
+		 */
+		public boolean[] getDealbreakers(int userId) {
+		    boolean[] result = {false, false, false};
+		    String sql = "SELECT sleep_schedule, cleanliness, guests FROM dealbreakers WHERE user_id = ?";
+		    try (Connection connection = DriverManager.getConnection(URL);
+		        PreparedStatement pstmt = connection.prepareStatement(sql)) {
+		        pstmt.setInt(1, userId);
+		        ResultSet rs = pstmt.executeQuery();
+		        if (rs.next()) {
+		            result[0] = rs.getInt("sleep_schedule") == 1;
+		            result[1] = rs.getInt("cleanliness") == 1;
+		            result[2] = rs.getInt("guests") == 1;
+		        }
+		    } catch (SQLException e) {
+		        System.err.println(e.getMessage());
+		    }
+		    return result;
+		}
 
 		// For getting a list of everyone else's profiles except the user requesting a match, for comparing
 		/**
@@ -316,6 +377,7 @@ public class DatabaseManager {
 		 */
 		public java.util.List<SortProfiles> getAllMatches(int excludeUserId) {
 			UserProfile currProfile = getProfile(excludeUserId);
+			boolean[] dealbreakers = getDealbreakers(excludeUserId);
 			java.util.List<SortProfiles> profiles = new java.util.ArrayList<>();
 			//java.util.List<String> userPreferences = this.getPreferences(excludeUserId);
 			String sql = "SELECT a.id, a.name, p.sleep_schedule, p.cleanliness, p.guests "
@@ -334,8 +396,22 @@ public class DatabaseManager {
 						rs.getString("cleanliness"),
 						rs.getString("guests")
 					);
-					SortProfiles sProfile = new SortProfiles(currProfile, profile);
-					profiles.add(sProfile);
+					
+					boolean filtered = false;
+				    if (dealbreakers[0] && !currProfile.getSleepSchedule().equalsIgnoreCase(profile.getSleepSchedule())) {
+				        filtered = true;
+				    }
+				    if (dealbreakers[1] && !currProfile.getCleanliness().equalsIgnoreCase(profile.getCleanliness())) {
+				        filtered = true;
+				    }
+				    if (dealbreakers[2] && !currProfile.getGuests().equalsIgnoreCase(profile.getGuests())) {
+				        filtered = true;
+				    }
+				    
+				    if (!filtered) {
+				        SortProfiles sProfile = new SortProfiles(currProfile, profile);
+				        profiles.add(sProfile);
+				    }
 				}
 			} catch (SQLException e) {
 				System.err.println(e.getMessage());
@@ -374,6 +450,20 @@ public class DatabaseManager {
 		    } catch (SQLException e) {
 		        System.err.println(e.getMessage());
 		    }
+		    
+		    System.out.println("=== DEALBREAKERS ===");
+		    try (Connection conn = DriverManager.getConnection(URL);
+		         Statement stmt = conn.createStatement();
+		         ResultSet rs = stmt.executeQuery("SELECT * FROM dealbreakers")) {
+		        while (rs.next()) {
+		            System.out.println("UserID: " + rs.getInt("user_id")
+		                + " | Sleep: " + rs.getInt("sleep_schedule")
+		                + " | Clean: " + rs.getInt("cleanliness")
+		                + " | Guests: " + rs.getInt("guests"));
+		        }
+		    } catch (SQLException e) {
+		        System.err.println(e.getMessage());
+		    }
 		}
         
 		// For putting in an admin account, in case our db gets deleted or something
@@ -386,6 +476,7 @@ public class DatabaseManager {
 		            insert("admin", "password");
 		            int adminId = getUserId("admin");
 		            savePreferences(adminId, "late", "medium", "sometimes");
+		            saveDealbreakers(adminId, false, false, false);
 		        }
 		    } catch (SQLException e) {
 		        System.err.println(e.getMessage());
