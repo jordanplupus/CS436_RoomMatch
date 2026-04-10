@@ -14,7 +14,7 @@ import javafx.scene.layout.GridPane;
 import model.UserProfile;
 import javafx.fxml.FXML;
 
-public class LoginPage {
+public class LoginPage implements Page{
 
 	@FXML
 	private TextField usernameTextField;
@@ -25,7 +25,8 @@ public class LoginPage {
 	private RoomMatchGUI controller;
 	private int counter = 0;
 
-	public void setMainController(RoomMatchGUI source) {
+	
+	public void setMainController(RoomMatchGUI source, UserProfile page) {
 		this.controller = source;
 	}
 
@@ -41,9 +42,7 @@ public class LoginPage {
 
 	@FXML
 	private void RegisterHandler(ActionEvent event) throws IOException {
-		RegisterPage registerPage = new RegisterPage(controller);
-		BorderPane window = registerPage.initializePanel();
-		controller.setToPage(window, -1, -1);
+		controller.setToPage(View.REGISTER, "Register");
 	}
 
 }

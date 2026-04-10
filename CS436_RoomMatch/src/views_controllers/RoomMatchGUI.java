@@ -1,7 +1,6 @@
 package views_controllers;
 
 import java.io.IOException;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,15 +11,13 @@ import model.DatabaseManager;
 import model.UserProfile;
 
 /**
- * <p>
- * Main is contained in this method.
- * </p>
+ * <p>Main is contained in this method.</p>
  */
 public class RoomMatchGUI extends Application {
 	public static void main(String[] args) {
 		launch(args);
 	}
-
+	
 	private int currentUserId = -1;
 
 	private DatabaseManager db = new DatabaseManager();
@@ -29,13 +26,12 @@ public class RoomMatchGUI extends Application {
 	private BorderPane window;
 	private Stage stage;
 
-	private FXMLLoader loader;
+//	private FXMLLoader loader;
 	private Parent root;
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		
-		// Initialize database
+		//Initialize database
 		db.init();
 		// Add admin account
 		db.seedAdmin();
@@ -47,22 +43,14 @@ public class RoomMatchGUI extends Application {
 		//db.removePreferenceEntry("major");
 		
 		this.stage = stage;
-		stage.setTitle("Login");
 		window = new BorderPane();
 		Scene scene = new Scene(window);
 
 		userProfile = new UserProfile();
-
-		loader = new FXMLLoader(getClass().getResource("LoginView.fxml"));
-		root = loader.load();
-		LoginPage loginPage = loader.getController();
-		loginPage.setMainController(this);
-		window.setCenter(root);
-
-
 		userProfile.verifyPreferenceCount(db.getPreferenceTableEntryCount() - 1);
-	
 		
+		this.setToPage(View.LOGIN, "Login");
+
 		stage.setScene(scene);
 		stage.show();
 	}
@@ -75,20 +63,17 @@ public class RoomMatchGUI extends Application {
 		window.setCenter(page);
 	}
 
-	public void setToPage(String fxml, String title) throws IOException {
-		loader = new FXMLLoader(getClass().getResource(fxml));
-		root = loader.load();
+	public void setToPage(View fxml, String title) throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml.getFilename()));
+		Parent root = loader.load();
 		
-		Object controller = loader.getController();
+		Page controller = loader.getController();
+		controller.setMainController(this, userProfile);
 		
-		if (controller instanceof LoginPage) {
-			((LoginPage) controller).setMainController(this);
-		} else if (controller instanceof MainPageView) {
-			((MainPageView) controller).setMainController(this, userProfile);
-		}
 		stage.setTitle(title);
 		window.setCenter(root);
 		stage.sizeToScene();
+
 	}
 
 	// Temporary login logic for Iteration 1 using hardcoded credentials.
@@ -101,10 +86,11 @@ public class RoomMatchGUI extends Application {
 			userProfile.login(username);
 
 			if (!db.getPreferences(currentUserId).isEmpty()) {
-				this.setToPage("MainView.fxml", "Welcome");
-				MainPageView mainPage = loader.getController();
-				mainPage.setMainController(this, userProfile);
-				mainPage.setInfo();
+				loadDealbreakers();
+				this.setToPage(View.MAIN, "Welcome");
+//				main.setInfo();
+//				MainPageView mainPage = (MainPageView) this.setToPage("MainView.fxml", "Welcome");
+//				mainPage.setInfo();
 
 			} else {
 				stage.setTitle("Set Preferences");
@@ -147,6 +133,15 @@ public class RoomMatchGUI extends Application {
 		userProfile.setPreferences(preferences);
 	}
 
+	public void saveDealbreakers(boolean sleep, boolean cleanliness, boolean guests) {
+	    db.saveDealbreakers(currentUserId, sleep, cleanliness, guests);
+	}
+
+	public void loadDealbreakers() {
+	    boolean[] dbs = db.getDealbreakers(currentUserId);
+	    userProfile.setDealbreakers(dbs[0], dbs[1], dbs[2]);
+	}
+	
 	public java.util.List<model.SortProfiles> getMatches() {
 		return db.getAllMatches(currentUserId);
 	}

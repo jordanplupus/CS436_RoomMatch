@@ -22,7 +22,7 @@ import javafx.scene.layout.VBox;
 import model.SortProfiles;
 import model.UserProfile;
 
-public class MainPageView {
+public class MainPageView implements Page {
 	RoomMatchGUI controller;
 	UserProfile userProfile;
 
@@ -34,6 +34,8 @@ public class MainPageView {
 	private Label cleanlinessLabel;
 	@FXML
 	private Label guestsLabel;
+	@FXML
+	private Label noMatches;
 	@FXML
 	private VBox infoBox;
 	@FXML
@@ -49,20 +51,46 @@ public class MainPageView {
 	public void setMainController(RoomMatchGUI source, UserProfile user) {
 		controller = source;
 		userProfile = user;
+		try {
+			setInfo();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 
-	public void setInfo() throws IOException {
+	private void setInfo() throws IOException {
+		controller.getPreferences();
+		controller.loadDealbreakers();
+
+		String sleepText = "Your Sleep Schedule: " + userProfile.getSleepSchedule();
+		if (userProfile.isSleepDealbreaker())
+			sleepText += " (deal-breaker)";
+
+		String cleanText = "Your Cleanliness: " + userProfile.getCleanliness();
+		if (userProfile.isCleanlinessDealbreaker())
+			cleanText += " (deal-breaker)";
+
+		String guestText = "Your Guest Frequency: " + userProfile.getGuests();
+		if (userProfile.isGuestsDealbreaker())
+			guestText += " (deal-breaker)";
+
 		controller.getPreferences();
 		welcomeLabel.setText("Welcome " + userProfile.getUser() + "!");
-		sleepLabel.setText("Your Sleep Schedule: " + userProfile.getSleepSchedule());
-		cleanlinessLabel.setText("Your Cleanliness: " + userProfile.getCleanliness());
-		guestsLabel.setText("Your Guest Frequency: " + userProfile.getGuests());
+		sleepLabel.setText(sleepText);
+		cleanlinessLabel.setText(cleanText);
+		guestsLabel.setText(guestText);
 
 		java.util.List<SortProfiles> matches = controller.getMatches();
+		infoBox.getChildren().clear();
+		
+		if (matches.isEmpty()) {
+			noMatches.setText("No matches found. Try adjusting your deal-breakers or check back when more users have signed up.");
+			infoBox.getChildren().add(noMatches);
+		}
 
 		for (SortProfiles match : matches) {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("MatchCardView.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(View.MATCHES.getFilename()));
 			Parent root = loader.load();
 
 			ProfileCard card = loader.getController();
@@ -98,7 +126,7 @@ public class MainPageView {
 
 	private void logout() throws IOException {
 		controller.logout();
-		controller.setToPage("LoginView.fxml", "Login");
+		controller.setToPage(View.LOGIN, "Login");
 	}
 
 }
