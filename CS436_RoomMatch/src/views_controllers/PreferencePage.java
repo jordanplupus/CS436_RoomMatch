@@ -48,12 +48,12 @@ public class PreferencePage {
         //Label guestLabel = new Label("How Often You Have Guests");
         
         // Create description labels
-        file = readFile("\\txt\\descriptions.txt");
+        file = readFile("/txt/descriptions.txt");
         while( file.hasNextLine() )
         	labels.add(new Label(file.nextLine()));
         
         // Create preference dropdown menus
-        file = readFile("\\txt\\preferences.txt");
+        file = readFile("/txt/preferences.txt");
         while( file.hasNextLine() ) {
         	String split[] = file.nextLine().split(" ");
         	
