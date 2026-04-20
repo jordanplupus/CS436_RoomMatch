@@ -1,8 +1,13 @@
 package views_controllers;
 
+import java.io.IOException;
 import java.util.Optional;
 
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -17,188 +22,124 @@ import javafx.scene.layout.VBox;
 import model.SortProfiles;
 import model.UserProfile;
 
-public class MainPageView {
+public class MainPageView implements Page {
 	RoomMatchGUI controller;
 	UserProfile userProfile;
+	private Menu options;
+
+	@FXML
+	private Label welcomeLabel;
+	@FXML
+	private Label sleepLabel;
+	@FXML
+	private Label cleanlinessLabel;
+	@FXML
+	private Label guestsLabel;
+	@FXML
+	private Label noMatches;
+	@FXML
+	private VBox infoBox;
+	@FXML
+	private ScrollPane scrollPane;
 	
-	public MainPageView(RoomMatchGUI source, UserProfile user) {
+	
+	@FXML
+	private MenuItem option1;
+	@FXML
+	private MenuItem option2;
+	@FXML
+	private MenuItem option3;
+	@FXML
+	private MenuItem option4 = new MenuItem("Modify existing preferences");
+	
+	public void setMainController(RoomMatchGUI source, UserProfile user) {
 		controller = source;
 		userProfile = user;
+		try {
+			setInfo();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 	
-	public BorderPane initializePanel() {
-		BorderPane window = new BorderPane();
+	private void setInfo() throws IOException {
 		
 		boolean isAdmin = controller.isAdmin();
-		
 		controller.getPreferences();
 		controller.loadDealbreakers();
 
-		MenuItem option1 = new MenuItem("set preferences");
-		MenuItem option2 = new MenuItem("delete account");
-		MenuItem option3 = new MenuItem("logout");
-		MenuItem option4 = null;
-		if( isAdmin ) 
-			option4 = new MenuItem("modify existing preferences");
-		
-		Menu options = new Menu("Options");
-		if( isAdmin )
-			options.getItems().addAll(option1, option2, option3, option4);
-		else options.getItems().addAll(option1, option2, option3);
-		
-		option1.setOnAction((event) -> {
-			PreferencePage preferencePage = new PreferencePage(controller, userProfile);
-			controller.setToPage(preferencePage.initializePanel(), 500, 400);
-		});
-		
-		option2.setOnAction((event) -> {
-			Alert alert = new Alert(AlertType.WARNING, 
-					"Are you sure you want to delete your account?\nThis action cannot be undone.", 
-					ButtonType.YES, ButtonType.CANCEL);
-			Optional<ButtonType> result = alert.showAndWait();
-			if (result.isPresent() && result.get() == ButtonType.YES) {
-				controller.deleteAccount();
-				logout();
-			}
-		});
-		
-		option3.setOnAction((event) -> {
-			logout();
-		});
-		
-		if( isAdmin ) {
-			option4.setOnAction((event) -> {
-				System.out.println("Not yet implemented");
-			});
-		}
+		option4.setVisible(isAdmin);
 
-		MenuBar menuBar = new MenuBar();
-		menuBar.getMenus().addAll(options);
-		window.setTop(menuBar);
-		
-		Label welcomeLabel = new Label("Welcome " + userProfile.getUser());
-		
+
 		String sleepText = "Your Sleep Schedule: " + userProfile.getSleepSchedule();
-		if (userProfile.isSleepDealbreaker()) sleepText += " (deal-breaker)";
-		Label sleepLabel = new Label(sleepText);
+		if (userProfile.isSleepDealbreaker())
+			sleepText += " (deal-breaker)";
 
 		String cleanText = "Your Cleanliness: " + userProfile.getCleanliness();
-		if (userProfile.isCleanlinessDealbreaker()) cleanText += " (deal-breaker)";
-		Label cleanlinessLabel = new Label(cleanText);
+		if (userProfile.isCleanlinessDealbreaker())
+			cleanText += " (deal-breaker)";
 
 		String guestText = "Your Guest Frequency: " + userProfile.getGuests();
-		if (userProfile.isGuestsDealbreaker()) guestText += " (deal-breaker)";
-		Label guestsLabel = new Label(guestText);
-		
-		Label matchesTitle = new Label("Your Matches");
+		if (userProfile.isGuestsDealbreaker())
+			guestText += " (deal-breaker)";
 
-		VBox infoBox = new VBox(10);
-		infoBox.setPadding(new Insets(15));
-		infoBox.getChildren().addAll(
-				welcomeLabel,
-				sleepLabel,
-				cleanlinessLabel,
-				guestsLabel,
-				new Separator(),
-				matchesTitle
-		);
+		controller.getPreferences();
+		welcomeLabel.setText("Welcome " + userProfile.getUser() + "!");
+		sleepLabel.setText(sleepText);
+		cleanlinessLabel.setText(cleanText);
+		guestsLabel.setText(guestText);
 
 		java.util.List<SortProfiles> matches = controller.getMatches();
-
-		if (matches.isEmpty()) {
-			infoBox.getChildren().add(
-				new Label("No matches found. Try adjusting your deal-breakers or check back when more users\n have signed up.")			);
-		} else {
-			for (SortProfiles match : matches) {
-				VBox matchCard = buildMatchCard(match);
-				infoBox.getChildren().add(matchCard);
-			}
-		}
-
-		ScrollPane scrollPane = new ScrollPane(infoBox);
-		window.setCenter(scrollPane);
+		infoBox.getChildren().clear();
 		
-		return window;
+		if (matches.isEmpty()) {
+			noMatches.setText("No matches found. Try adjusting your deal-breakers or check back when more users have signed up.");
+			infoBox.getChildren().add(noMatches);
+		}
+
+		for (SortProfiles match : matches) {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(View.MATCHES.getFilename()));
+			Parent root = loader.load();
+
+			ProfileCard card = loader.getController();
+			card.createCard(match);
+			infoBox.getChildren().add(root);
+		}
+		scrollPane.setContent(infoBox);
+		
 	}
-	
-	private VBox buildMatchCard(SortProfiles match) {
-		UserProfile otherProfile = match.getOtherProfile();
 
-		int score = match.getScore();
-		int maxScore = 35;
-		int percentage = (int)(((double)(score + 20) / (maxScore + 20)) * 100);
-
-		Label nameLabel = new Label("Match: " + match.getOtherUser());
-		Label percentLabel = new Label("Compatibility: " + percentage + "%");
-
-		boolean sleepMatch = userProfile.getSleepSchedule().equalsIgnoreCase(otherProfile.getSleepSchedule());
-		boolean cleanMatch = userProfile.getCleanliness().equalsIgnoreCase(otherProfile.getCleanliness());
-		boolean guestMatch = userProfile.getGuests().equalsIgnoreCase(otherProfile.getGuests());
-
-		Label sleepMatchLabel = new Label(
-			"Sleep Schedule: " + compareText(userProfile.getSleepSchedule(), otherProfile.getSleepSchedule(), sleepMatch)
-		);
-
-		Label cleanMatchLabel = new Label(
-			"Cleanliness: " + compareText(userProfile.getCleanliness(), otherProfile.getCleanliness(), cleanMatch)
-		);
-
-		Label guestMatchLabel = new Label(
-			"Guest Frequency: " + compareText(userProfile.getGuests(), otherProfile.getGuests(), guestMatch)
-		);
-
-		String warningText = buildWarningText(sleepMatch, cleanMatch, guestMatch);
-		Label warningLabel = new Label(warningText);
-
-		VBox matchCard = new VBox(5);
-		matchCard.setPadding(new Insets(10));
-		matchCard.setStyle(
-			"-fx-border-color: black;" +
-			"-fx-border-width: 1;" +
-			"-fx-background-color: white;"
-		);
-
-		matchCard.getChildren().addAll(
-				nameLabel,
-				percentLabel,
-				sleepMatchLabel,
-				cleanMatchLabel,
-				guestMatchLabel
-		);
-
-		if (!warningText.isEmpty()) {
-			matchCard.getChildren().add(warningLabel);
-		}
-
-		return matchCard;
+	@FXML
+	private void optionOneHandler(ActionEvent e) throws IOException {
+		controller.setToPage(View.PREF, "Set Preferences");
 	}
-	
-	private String compareText(String currentValue, String otherValue, boolean isMatch) {
-		if (isMatch) {
-			return "Match (" + currentValue + ")";
-		}
-		return "Mismatch (" + currentValue + " vs " + otherValue + ")";
-	}
-	
-	private String buildWarningText(boolean sleepMatch, boolean cleanMatch, boolean guestMatch) {
-		String warning = "";
 
-		if (!cleanMatch) {
-			warning += "Potential conflict: cleanliness. ";
+	@FXML
+	private void optionTwoHandler(ActionEvent e) throws IOException {
+		Alert alert = new Alert(AlertType.WARNING,
+				"Are you sure you want to delete your account?\nThis action cannot be undone.", ButtonType.YES,
+				ButtonType.CANCEL);
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.isPresent() && result.get() == ButtonType.YES) {
+			controller.deleteAccount();
+			logout();
 		}
-		if (!sleepMatch) {
-			warning += "Potential conflict: sleep schedule. ";
-		}
-		if (!guestMatch) {
-			warning += "Potential conflict: guest frequency.";
-		}
-
-		return warning.trim();
 	}
-	
-	private void logout() {
+
+	@FXML
+	private void optionThreeHandler(ActionEvent e) throws IOException {
+		logout();
+	}
+
+	private void logout() throws IOException {
 		controller.logout();
-		LoginPage loginPage = new LoginPage(controller);
-		controller.setToPage(loginPage.initializePanel(), 300, 200);
+		controller.setToPage(View.LOGIN, "Login");
 	}
+	
+	@FXML
+	private void optionFourHandler(ActionEvent e) throws IOException {
+		System.out.println("Not yet implemented");
+	}
+
 }

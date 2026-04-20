@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="425.0" prefWidth="320.0" style="-fx-background-color: #FFEDCF;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="views_controllers.RegisterPage">
+   <children>
+      <Label alignment="CENTER" prefHeight="55.0" prefWidth="315.0" style="-fx-background-color: #ED593B;" text="Roommate Match" textAlignment="CENTER" textFill="WHITE" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <font>
+            <Font name="Arial Bold" size="20.0" />
+         </font>
+      </Label>
+      <Label layoutX="30.0" layoutY="100.0" text="Enter Username: " />
+      <Label layoutX="30.0" layoutY="150.0" text="Enter Password: " />
+      <Button layoutX="45.0" layoutY="250.0" mnemonicParsing="false" onAction="#RegisterHandler" prefHeight="25.0" prefWidth="240.0" style="-fx-background-color: #ED593B;" text="Sign Up" textFill="WHITE" />
+      <Button layoutX="45.0" layoutY="290.0" mnemonicParsing="false" onAction="#ReturnHandler" prefHeight="25.0" prefWidth="240.0" style="-fx-background-color: #FFDDCF; -fx-border-color: #ed593b;" text="Cancel" textFill="#ed593b" />
+      <Label layoutX="30.0" layoutY="200.0" text="Confirm Password: " />
+      <PasswordField fx:id="passwordTextField" layoutX="140.0" layoutY="145.0" prefHeight="25.0" prefWidth="160.0" promptText="Password" />
+      <PasswordField fx:id="rePasswordTextField" layoutX="140.0" layoutY="195.0" promptText="Confirm Password" />
+      <TextField fx:id="usernameTextField" layoutX="140.0" layoutY="95.0" prefHeight="25.0" prefWidth="160.0" promptText="Username" />
+      <Label fx:id="information" alignment="TOP_CENTER" layoutY="335.0" prefHeight="90.0" prefWidth="320.0" textFill="RED" />
+   </children>
+</AnchorPane>

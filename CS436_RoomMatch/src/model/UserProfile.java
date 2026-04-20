@@ -31,9 +31,16 @@ public class UserProfile {
 		cleanliness = preferences.get(1);
 		guests = preferences.get(2);
 		
-		for(int i=0; i<preferences.size(); i++) {
-			this.preferences.add(preferences.get(i));
+		if (this.preferences.isEmpty()) {
+			for(int i=0; i<preferences.size(); i++) {
+				this.preferences.add(preferences.get(i));
+			}
+		} else {
+			for(int i=0; i<preferences.size(); i++) {
+				this.preferences.set(i, preferences.get(i));
+			}
 		}
+		
 	}
 	
 	public int getPreferenceCount() {
@@ -63,9 +70,16 @@ public class UserProfile {
 		cleanlinessDealbreaker = dealbreakers.get(1);
 		guestsDealbreaker = dealbreakers.get(2);
 		
-		for(int i=0; i<dealbreakers.size(); i++) {
-			this.dealbreakers.add(dealbreakers.get(i));
+		if (this.preferences.isEmpty()) {
+			for(int i=0; i<dealbreakers.size(); i++) {
+				this.dealbreakers.add(dealbreakers.get(i));
+			}
+		} else {
+			for(int i=0; i<dealbreakers.size(); i++) {
+				this.dealbreakers.set(i, dealbreakers.get(i));
+			}
 		}
+		
 	}
 
 	public boolean isSleepDealbreaker() {
