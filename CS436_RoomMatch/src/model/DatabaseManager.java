@@ -263,8 +263,14 @@ public class DatabaseManager {
 			}
 		}
 		
+		/**
+		 * Saves user preferences into the database with an array. Adds a new preferences
+		 * table entry if it doesn't already exist.
+		 * @param userID - preferences table id to save to 
+		 * @param preferences - array of all preferences
+		 */
 		public void savePreferences(int userID, java.util.List<String> preferences) {
-			ArrayList<String> columns = getTableNames();
+			ArrayList<String> columns = getTableNames("preferences");
 			String sql = "INSERT OR REPLACE INTO preferences (";
 			
 			for(int i=0; i<columns.size(); i++) {
@@ -350,15 +356,22 @@ public class DatabaseManager {
 		    }
 		}
 		
-		public void saveDealbreakers(int userID, java.util.List<Boolean> dealbreakers) {
-			ArrayList<String> columns = getTableNames();
+		/**
+		 * Saves deal-breaker settings for a user. Each preference can be marked
+		 * as a deal-breaker (true) or flexible (false). Deal-breakers are stored
+		 * as 1 or 0 in the database. 
+		 * @param userId - id of user in the accounts table
+		 * @param dealbreakers - all as an array
+		 */
+		public void saveDealbreakers(int userId, java.util.List<Boolean> dealbreakers) {
+			ArrayList<String> columns = getTableNames("dealbreakers");
 			String sql = "INSERT OR REPLACE INTO dealbreakers (";
 			
 			for(int i=0; i<columns.size(); i++) {
 				sql += columns.get(i) + (i != columns.size() - 1 ? ", " : ") ");
 			}
 			
-			sql += "VALUES (" + userID + ", ";
+			sql += "VALUES (" + userId + ", ";
 			
 			for(int i=0; i<dealbreakers.size(); i++) {
 				sql += dealbreakers.get(i) + (i != dealbreakers.size() - 1 ? ", " : ") ");
@@ -388,19 +401,33 @@ public class DatabaseManager {
 		        PreparedStatement pstmt = connection.prepareStatement(sql)) {
 		        pstmt.setInt(1, userId);
 		        ResultSet rs = pstmt.executeQuery();
+		        int entries = getTableEntryCount("dealbreakers");
 		        if (rs.next()) {
+		        	/*
 		            result[0] = rs.getInt("sleep_schedule") == 1;
 		            result[1] = rs.getInt("cleanliness") == 1;
 		            result[2] = rs.getInt("guests") == 1;
-		        }
+		            */
+		            
+					for(int i=1; i<entries; i++) {
+						result[i-1] = rs.getInt(i) == 1;
+					}
+				} else {
+					System.err.println("Failed to retrieve entries from dealbreaker table "
+									 + "where user id = " + userId);
+				}
 		    } catch (SQLException e) {
 		        System.err.println(e.getMessage());
 		    }
 		    return result;
 		}
 		
-        private ArrayList<String> getTableNames() {
-        	String sql = "SELECT name FROM pragma_table_info('preferences')";
+		/**
+		 * Gets all column names from the specified table
+		 * @return - Table names as array 
+		 */
+        private ArrayList<String> getTableNames(String tableName) {
+        	String sql = "SELECT name FROM pragma_table_info('" + tableName + "')";
         	ArrayList<String> columns = new ArrayList<>();
         	
         	try (Connection conn = DriverManager.getConnection(URL);
@@ -417,7 +444,8 @@ public class DatabaseManager {
         }
 
 		// For getting a list of everyone else's profiles except the user requesting a match, for comparing
-		/**
+		// NOTE CURRENTLY UNUSED AND OUTDATED
+        /**
 		 * Gets and returns a list of all other user profiles that are not this user. 
 		 * <p>Used to create compatibility scoring for this user to other users</p>
 		 * @param excludeUserId - User id of this user
@@ -484,15 +512,27 @@ public class DatabaseManager {
 			UserProfile currProfile = getProfile(excludeUserId);
 			boolean[] dealbreakers = getDealbreakers(excludeUserId);
 			java.util.List<SortProfiles> profiles = new java.util.ArrayList<>();
-			//java.util.List<String> userPreferences = this.getPreferences(excludeUserId);
+			//System.out.println(getTableNames("preferences").toString());
+			java.util.List<String> name = getTableNames("preferences");
 			String sql = "SELECT a.id, a.name, p.sleep_schedule, p.cleanliness, p.guests "
 					+ "FROM accounts a "
 					+ "JOIN preferences p ON a.id = p.user_id "
 					+ "WHERE a.id != ?";
+			/*
+			String sql = "SELECT a.id, a.name, ";
+			for(int i=1; i<name.size(); i++) {
+				sql += "p." + name.get(i) + (i!=name.size()-1 ? ", " : " ");
+			}
+			sql += "FROM accounts a "
+				 + "JOIN preferences p ON a.id = p.user_id "
+				 + "WHERE a.id != ?";
+			*/
+			
 			try (Connection connection = DriverManager.getConnection(URL);
 				PreparedStatement pstmt = connection.prepareStatement(sql)) {
 				pstmt.setInt(1, excludeUserId);
 				ResultSet rs = pstmt.executeQuery();
+				int entries = getTableEntryCount("preferences");
 				while (rs.next()) {
 					UserProfile profile = new UserProfile();
 					profile.login(rs.getString("name"));
