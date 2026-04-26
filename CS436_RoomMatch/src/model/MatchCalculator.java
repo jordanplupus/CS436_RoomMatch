@@ -12,9 +12,11 @@ public class MatchCalculator {
         ArrayList<String> aPrefs = a.getPreferencesAsArray();
         ArrayList<String> bPrefs = b.getPreferencesAsArray();
         
-        if( weights.size() != aPrefs.size() || weights.size() != bPrefs.size() ) 
+        if( weights.size() != aPrefs.size() || weights.size() != bPrefs.size() ) {
+        	System.out.println(weights.toString() + "\n" + aPrefs.toString() + "\n" + bPrefs.toString());
         	throw new IllegalArgumentException("A major error occurred, arrays do not align.\n"
 					+ "Thrown in MatchCalculator.java");
+        }
         
         for(int i=0; i<aPrefs.size(); i++) {
         	s = weights.get(i).split(" ");

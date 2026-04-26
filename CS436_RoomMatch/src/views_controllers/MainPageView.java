@@ -80,14 +80,16 @@ public class MainPageView implements Page {
 	
 	private void setInfo() throws IOException {
 		boolean isAdmin = controller.isAdmin();
-		controller.getPreferences();
-		controller.loadDealbreakers();
+		controller.resetPreferences();
+		//controller.loadDealbreakers();
 
 		option4.setVisible(isAdmin);
 		option5.setVisible(isAdmin);
 		
 		preferences = userProfile.getPreferencesAsArray();
 		dealbreakers = userProfile.getDealbreakersAsArray();
+		
+		//System.out.println(preferences.toString() + "\n" + dealbreakers.toString());
 		
 		prefDescr = ReadWrite.RetrieveFileAsTextArr("/txt/descriptions.txt");
 

@@ -96,6 +96,10 @@ public class DatabaseManager {
    		    		System.out.println("Table entry '" + columnName + "' already exists");
    		    	else System.err.println(e.getMessage());
    		    }
+        	
+        	if( getTableEntryCount("preferences") != getTableEntryCount("dealbreakers") ) 
+        		throw new IllegalArgumentException("A major error occured, table values do not align. "
+        				+ "Error thrown in DatabaseManager");
         }
         
         /**
@@ -259,6 +263,7 @@ public class DatabaseManager {
 		 * @param cleanliness
 		 * @param guests
 		 */
+		/*
 		public void savePreferences(int userId, String sleep, String cleanliness, String guests) {
 			String sql = "INSERT OR REPLACE INTO preferences (user_id, sleep_schedule, cleanliness, guests) "
 					+ "VALUES (?, ?, ?, ?)";
@@ -272,7 +277,7 @@ public class DatabaseManager {
 			} catch (SQLException e) {
 				System.err.println(e.getMessage());
 			}
-		}
+		}*/
 		
 		/**
 		 * Saves user preferences into the database with an array. Adds a new preferences
@@ -309,8 +314,8 @@ public class DatabaseManager {
 		 * @param userId - id of user in the preferences table
 		 * @return ArrayList
 		 */
-		public java.util.List<String> getPreferences(int userId) {
-			java.util.List<String> userPreferences = new java.util.ArrayList<>();
+		public java.util.ArrayList<String> getPreferences(int userId) {
+			java.util.ArrayList<String> userPreferences = new java.util.ArrayList<>();
 			String sql = "SELECT * FROM preferences WHERE user_id='" + userId + "'";
 			try (Connection connection = DriverManager.getConnection(URL); 
 				 PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -352,6 +357,7 @@ public class DatabaseManager {
 		 * @param cleanliness - true if cleanliness is a deal-breaker
 		 * @param guests - true if guest frequency is a deal-breaker
 		 */
+		/*
 		public void saveDealbreakers(int userId, boolean sleep, boolean cleanliness, boolean guests) {
 		    String sql = "INSERT OR REPLACE INTO dealbreakers (user_id, sleep_schedule, cleanliness, guests) "
 		            + "VALUES (?, ?, ?, ?)";
@@ -365,7 +371,7 @@ public class DatabaseManager {
 		    } catch (SQLException e) {
 		        System.err.println(e.getMessage());
 		    }
-		}
+		}*/
 		
 		/**
 		 * Saves deal-breaker settings for a user. Each preference can be marked
@@ -396,6 +402,9 @@ public class DatabaseManager {
 			} catch(SQLException e) {
 				System.err.println(e.getMessage());
 			}
+			
+			ArrayList<Boolean> dlb = getDealbreakers(userId);
+			System.out.println(dlb.toString());
 		}
 
 		/**
@@ -405,24 +414,24 @@ public class DatabaseManager {
 		 * @param userId - id of user in the accounts table
 		 * @return boolean array of length 3
 		 */
-		public boolean[] getDealbreakers(int userId) {
-			int entries = getTableEntryCount("dealbreakers") - 1;
-		    boolean[] result = new boolean[entries];
-		    String sql = "SELECT sleep_schedule, cleanliness, guests FROM dealbreakers WHERE user_id = ?";
+		public ArrayList<Boolean> getDealbreakers(int userId) {
+			int entries = getTableEntryCount("dealbreakers");
+		    ArrayList<Boolean> result = new ArrayList<>();
+		    // String sql = "SELECT sleep_schedule, cleanliness, guests FROM dealbreakers WHERE user_id = ?";
+		    String sql = "SELECT * FROM dealbreakers WHERE user_id='" + userId + "'";
 		    try (Connection connection = DriverManager.getConnection(URL);
 		        PreparedStatement pstmt = connection.prepareStatement(sql)) {
-		        pstmt.setInt(1, userId);
+		        // pstmt.setInt(1, userId);
 		        ResultSet rs = pstmt.executeQuery();
-		        entries += 1;
 		        if (rs.next()) {
 		        	/*
 		            result[0] = rs.getInt("sleep_schedule") == 1;
 		            result[1] = rs.getInt("cleanliness") == 1;
 		            result[2] = rs.getInt("guests") == 1;
 		            */
-		            
-					for(int i=1; i<entries; i++) {
-						result[i-1] = rs.getInt(i) == 1;
+		        	
+					for(int i=2; i<=entries; i++) {
+						result.add(rs.getInt(i) == 1);
 					}
 				} else {
 					System.err.println("Failed to retrieve entries from dealbreaker table "
@@ -463,6 +472,7 @@ public class DatabaseManager {
 		 * @param excludeUserId - User id of this user
 		 * @return ArrayList
 		 */
+        /*
 		public java.util.List<UserProfile> getAllProfilesExcept(int excludeUserId) {
 			java.util.List<UserProfile> profiles = new java.util.ArrayList<>();
 			String sql = "SELECT a.id, a.name, p.sleep_schedule, p.cleanliness, p.guests "
@@ -488,7 +498,7 @@ public class DatabaseManager {
 			}
 			
 			return profiles;
-		}
+		}*/
 		
 		// Helper function for getting a profile based on user's ID
 		/**
@@ -522,7 +532,7 @@ public class DatabaseManager {
 		 */
 		public java.util.List<SortProfiles> getAllMatches(int excludeUserId) {
 			UserProfile currProfile = getProfile(excludeUserId);
-			boolean[] dealbreakers = getDealbreakers(excludeUserId);
+			java.util.List<Boolean> dealbreakers = getDealbreakers(excludeUserId);
 			java.util.List<SortProfiles> profiles = new java.util.ArrayList<>();
 			//System.out.println(getTableNames("preferences").toString());
 			java.util.List<String> name = getTableNames("preferences");
@@ -565,7 +575,7 @@ public class DatabaseManager {
 					java.util.List<String> currPrefs = currProfile.getPreferencesAsArray();
 					java.util.List<String> otherPrefs = profile.getPreferencesAsArray();
 					for(int i=0; i<currPrefs.size(); i++) {
-						if( dealbreakers[i] && !currPrefs.get(i).equalsIgnoreCase(otherPrefs.get(i)) ) {
+						if( dealbreakers.get(i) && !currPrefs.get(i).equalsIgnoreCase(otherPrefs.get(i)) ) {
 							filtered = true;
 							break;
 						}
@@ -644,14 +654,22 @@ public class DatabaseManager {
 		// For putting in an admin account, in case our db gets deleted or something
 		public void seedAdmin() {
 		    String checkSql = "SELECT * FROM accounts WHERE name = 'admin'";
+		    java.util.ArrayList<String> prefs = new ArrayList<>(getTableEntryCount("dealbreakers"));
+		    java.util.ArrayList<Boolean> dealbreaks = new ArrayList<>(getTableEntryCount("dealbreakers"));
+		    
+		    for(int i=0; i<getTableEntryCount("dealbreaksers"); i++) {
+		    	prefs.add(null);
+		    	dealbreaks.add(false);
+		    }
+		    
 		    try (Connection connection = DriverManager.getConnection(URL);
 		         PreparedStatement pstmt = connection.prepareStatement(checkSql)) {
 		        ResultSet rs = pstmt.executeQuery();
 		        if (!rs.next()) {
 		            insert("admin", "password");
 		            int adminId = getUserId("admin");
-		            savePreferences(adminId, "late", "medium", "sometimes");
-		            saveDealbreakers(adminId, false, false, false);
+		            savePreferences(adminId, prefs);
+		            saveDealbreakers(adminId, dealbreaks);
 		        }
 		    } catch (SQLException e) {
 		        System.err.println(e.getMessage());

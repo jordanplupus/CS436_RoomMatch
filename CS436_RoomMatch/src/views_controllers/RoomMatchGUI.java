@@ -43,6 +43,8 @@ public class RoomMatchGUI extends Application {	// TODO: Implement loops in the 
 		db.seedAdmin();
 		// Show what's in the db
 		db.printAllData();
+		
+		//db.fixTable();
 
 		
 		//db.addPreferenceEntry("major");
@@ -91,7 +93,7 @@ public class RoomMatchGUI extends Application {	// TODO: Implement loops in the 
 			userProfile.login(username);
 
 			if (!db.getPreferences(currentUserId).isEmpty()) {
-				loadDealbreakers();
+				//loadDealbreakers();
 				this.setToPage(View.MAIN, "Welcome");
 //				main.setInfo();
 //				MainPageView mainPage = (MainPageView) this.setToPage("MainView.fxml", "Welcome");
@@ -144,9 +146,13 @@ public class RoomMatchGUI extends Application {	// TODO: Implement loops in the 
 		db.savePreferences(currentUserId, preferences);
 	}
 
-	public void getPreferences() {
-		java.util.List<String> preferences = db.getPreferences(currentUserId);
-		userProfile.setPreferences(preferences);
+	public void resetPreferences() {
+		java.util.ArrayList<String> preferences = db.getPreferences(currentUserId);
+		//userProfile.setPreferences(preferences);
+		java.util.ArrayList<Boolean> dealbreakers = db.getDealbreakers(currentUserId);
+		//userProfile.setDealbreakers(dealbreakers);
+		//System.out.println(currentUserId + "\n" + preferences.toString() + "\n" + dealbreakers.toString());
+		userProfile.setArrays(preferences, dealbreakers);
 	}
 	
 	public void addPreferenceEntry(String name) {
@@ -157,19 +163,21 @@ public class RoomMatchGUI extends Application {	// TODO: Implement loops in the 
 		db.removePreferenceEntry(name);
 	}
 
+	/*
 	public void saveDealbreakers(boolean sleep, boolean cleanliness, boolean guests) {
 	    db.saveDealbreakers(currentUserId, sleep, cleanliness, guests);
-	}
+	}*/
 	
 	public void saveDealbreakers(java.util.List<Boolean> dealbreakers) {
 		//db.saveDealbreakers(currentUserId, dealbreakers.get(0), dealbreakers.get(1), dealbreakers.get(2));
 		db.saveDealbreakers(currentUserId, dealbreakers);
 	}
 
+	/*
 	public void loadDealbreakers() {
 	    boolean[] dbs = db.getDealbreakers(currentUserId);
 	    userProfile.setDealbreakers(dbs[0], dbs[1], dbs[2]);
-	}
+	}*/
 	
 	public java.util.List<model.SortProfiles> getMatches() {
 		return db.getAllMatches(currentUserId);

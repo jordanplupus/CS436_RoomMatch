@@ -94,11 +94,15 @@ public class PreferencePage implements Page {
 			b.add(this.preferences.get(i).getDealBreakerValue());
 		}
 
-		userProfile.setPreferences(p);
+		//userProfile.setPreferences(p);
 		controller.savePreferences(p);
 
-		userProfile.setDealbreakers(b);
+		//userProfile.setDealbreakers(b);
 		controller.saveDealbreakers(b);
+		
+		//System.out.println(p.toString() + "\n" + b.toString());
+		userProfile.setArrays(p, b);
+		
 		controller.setToPage(View.MAIN, "Welcome");
 	}
 

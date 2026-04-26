@@ -15,6 +15,36 @@ public class UserProfile {
 	private boolean guestsDealbreaker = false;
 	private ArrayList<Boolean> dealbreakers = new ArrayList<>();
 	
+	public void setArrays(ArrayList<String> preferences, ArrayList<Boolean> dealbreakers) {
+		clearPreferences();
+		
+		if( this.preferences.isEmpty() ) {
+			for(String p : preferences )
+				this.preferences.add(p);
+		} else {
+			for(int i=0; i<preferences.size(); i++) {
+				if( i < this.preferences.size() )
+					this.preferences.set(i,  preferences.get(i));
+				else this.preferences.add(preferences.get(i));
+			}
+		}
+		
+		if (this.dealbreakers.isEmpty()) {
+			for(boolean d : dealbreakers) {
+				this.dealbreakers.add(d);
+			}
+		} else {
+			for(int i=0; i<dealbreakers.size(); i++) {
+				if( i < this.dealbreakers.size() ) 
+					this.dealbreakers.set(i, dealbreakers.get(i));
+				else this.dealbreakers.add(dealbreakers.get(i));
+			}
+		}
+		
+		checkCritError();
+	}
+	
+	/*
 	public void setPreferences(String sleep, String clean, String guest) {
 	    sleepSchedule = sleep;
 	    cleanliness = clean;
@@ -23,7 +53,7 @@ public class UserProfile {
 	    preferences.add(sleep);
 	    preferences.add(clean);
 	    preferences.add(guest);
-	}
+	}*/
 	
 	public void setPreferences(java.util.List<String> preferences) {
 		sleepSchedule = preferences.get(0);
@@ -42,6 +72,7 @@ public class UserProfile {
 			}
 		}
 		
+		//checkCritError();
 	}
 	
 	public String getSleepSchedule() {
@@ -52,6 +83,7 @@ public class UserProfile {
 		return cleanliness != null ? cleanliness : "null";
 	}
 	
+	/*
 	public void setDealbreakers(boolean sleep, boolean clean, boolean guests) {
 	    sleepDealbreaker = sleep;
 	    cleanlinessDealbreaker = clean;
@@ -79,7 +111,7 @@ public class UserProfile {
 			}
 		}
 		
-	}
+	}*/
 
 	public boolean isSleepDealbreaker() {
 	    return sleepDealbreaker;
@@ -119,6 +151,10 @@ public class UserProfile {
 		username = "";
 		loggedIn = false;
 		
+		clearPreferences();
+	}
+	
+	private void clearPreferences() {
 		preferences.clear();
 		dealbreakers.clear();
 	}
@@ -139,9 +175,11 @@ public class UserProfile {
 	}
 	
 	public void checkCritError() {
-		if( preferences.size() != dealbreakers.size() )
+		if( preferences.size() != dealbreakers.size() ) {
+			System.out.println(preferences.toString() + "\n" + dealbreakers.toString());
 			throw new IllegalArgumentException("A major error occurred, arrays do not align.\n"
 					+ "Thrown in UserProfile.java");
+		}
 	}
 
 	// for debugging
