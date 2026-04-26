@@ -514,11 +514,13 @@ public class DatabaseManager {
 			java.util.List<SortProfiles> profiles = new java.util.ArrayList<>();
 			//System.out.println(getTableNames("preferences").toString());
 			java.util.List<String> name = getTableNames("preferences");
+			java.util.List<String> preferences = new java.util.ArrayList<>();
+			/*
 			String sql = "SELECT a.id, a.name, p.sleep_schedule, p.cleanliness, p.guests "
 					+ "FROM accounts a "
 					+ "JOIN preferences p ON a.id = p.user_id "
 					+ "WHERE a.id != ?";
-			/*
+			*/
 			String sql = "SELECT a.id, a.name, ";
 			for(int i=1; i<name.size(); i++) {
 				sql += "p." + name.get(i) + (i!=name.size()-1 ? ", " : " ");
@@ -526,7 +528,6 @@ public class DatabaseManager {
 			sql += "FROM accounts a "
 				 + "JOIN preferences p ON a.id = p.user_id "
 				 + "WHERE a.id != ?";
-			*/
 			
 			try (Connection connection = DriverManager.getConnection(URL);
 				PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -536,13 +537,28 @@ public class DatabaseManager {
 				while (rs.next()) {
 					UserProfile profile = new UserProfile();
 					profile.login(rs.getString("name"));
+					
+					for(int i=3; i<=entries+1; i++) {
+						preferences.add(rs.getString(i));
+					}
+					profile.setPreferences(preferences);
+					/*
 					profile.setPreferences(
 						rs.getString("sleep_schedule"),
 						rs.getString("cleanliness"),
 						rs.getString("guests")
-					);
+					);*/
 					
 					boolean filtered = false;
+					java.util.List<String> currPrefs = currProfile.getPreferencesAsArray();
+					java.util.List<String> otherPrefs = profile.getPreferencesAsArray();
+					for(int i=0; i<currPrefs.size(); i++) {
+						if( dealbreakers[i] && !currPrefs.get(i).equalsIgnoreCase(otherPrefs.get(i)) ) {
+							filtered = true;
+							break;
+						}
+					}
+					/*
 				    if (dealbreakers[0] && !currProfile.getSleepSchedule().equalsIgnoreCase(profile.getSleepSchedule())) {
 				        filtered = true;
 				    }
@@ -551,12 +567,14 @@ public class DatabaseManager {
 				    }
 				    if (dealbreakers[2] && !currProfile.getGuests().equalsIgnoreCase(profile.getGuests())) {
 				        filtered = true;
-				    }
+				    }*/
 				    
 				    if (!filtered) {
 				        SortProfiles sProfile = new SortProfiles(currProfile, profile);
 				        profiles.add(sProfile);
 				    }
+				    
+				    preferences.clear();
 				}
 			} catch (SQLException e) {
 				System.err.println(e.getMessage());
