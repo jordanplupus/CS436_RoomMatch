@@ -44,7 +44,9 @@ public class ProfileCard {
 		//labels.getChildren().add(cleanMatchLabel);
 		
 		for(int i=0; i<userPrefs.size(); i++) {
-			matches[i] = userPrefs.get(i).equalsIgnoreCase(otherPrefs.get(i));
+			if( userPrefs.get(i) != null ) 
+				matches[i] = userPrefs.get(i).equalsIgnoreCase(otherPrefs.get(i));
+			else matches[i] = false;
 		}
 		/*
 		boolean sleepMatch = userProfile.getSleepSchedule().equalsIgnoreCase(otherProfile.getSleepSchedule());
@@ -73,6 +75,7 @@ public class ProfileCard {
 		String warningText = buildWarningText(matches, descr);
 		Label toDisplay = new Label(warningText);
 		toDisplay.setFont(system);
+		toDisplay.setWrapText(true);
 		labels.getChildren().add(toDisplay);
 		//warningLabel.setText(warningText);
 
@@ -90,7 +93,7 @@ public class ProfileCard {
 		
 		for(int i=0; i<matches.length; i++) {
 			if( !matches[i] ) {
-				warning += "Potential conflict: " + descr.get(i+1).replace('_', ' ') + ". ";
+				warning += (warning.isEmpty() ? "Potential conflict: " : ", ") + descr.get(i+1).replace('_', ' ');
 			}
 		}
 		
