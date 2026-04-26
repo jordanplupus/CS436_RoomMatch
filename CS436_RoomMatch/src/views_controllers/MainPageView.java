@@ -59,7 +59,9 @@ public class MainPageView implements Page {
 	@FXML
 	private MenuItem option3;
 	@FXML
-	private MenuItem option4 = new MenuItem("Modify existing preferences");
+	private MenuItem option4;
+	@FXML
+	private MenuItem option5 = new MenuItem();
 	
 	private ArrayList<String> preferences;
 	private ArrayList<Boolean> dealbreakers;
@@ -82,6 +84,7 @@ public class MainPageView implements Page {
 		controller.loadDealbreakers();
 
 		option4.setVisible(isAdmin);
+		option5.setVisible(isAdmin);
 		
 		preferences = userProfile.getPreferencesAsArray();
 		dealbreakers = userProfile.getDealbreakersAsArray();
@@ -169,5 +172,10 @@ public class MainPageView implements Page {
 	@FXML
 	private void optionFourHandler(ActionEvent e) throws IOException {
 		controller.setToPage(View.ADDPREF, "Add preferences");
+	}
+	
+	@FXML
+	private void optionFiveHandler(ActionEvent e) throws IOException {
+		controller.setToPage(View.REMOVEPREF, "Remove preferences");
 	}
 }

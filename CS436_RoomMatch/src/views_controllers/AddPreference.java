@@ -75,11 +75,6 @@ public class AddPreference implements Page {
 	
 	@FXML
 	private void savePreference(ActionEvent event) throws IOException {
-		System.out.println("Not yet implemented");
-		
-		// Note: Uncomment below to see this in action, just replace the txt files after
-		//       running this. Found in CS436_RoomMatch/txt/...
-		
 		String options[] = pOptions.getText().split("\n");
 		String preference = "";
 		
@@ -108,6 +103,7 @@ public class AddPreference implements Page {
 		pName.setText("");
 		pDescription.setText("");
 		pOptions.setText("");
+		information.setText("");
 		
 		controller.setToPage(View.ADDPREF, "Add preferences");
 	}

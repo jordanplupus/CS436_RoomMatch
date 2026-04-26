@@ -36,7 +36,8 @@
                         <items>
                           <MenuItem fx:id="option1" mnemonicParsing="false" onAction="#optionOneHandler" text="Set Prefrences" />
                               <MenuItem fx:id="option2" mnemonicParsing="false" onAction="#optionTwoHandler" text="Delete Account" />
-                              <MenuItem fx:id="option4" mnemonicParsing="false" onAction="#optionFourHandler" text="Add Prefernces" />
+                              <MenuItem fx:id="option4" mnemonicParsing="false" onAction="#optionFourHandler" text="Add Preferences" />
+                              <MenuItem fx:id="option5" mnemonicParsing="false" onAction="#optionFiveHandler" text="Remove Preferences" />
                               <MenuItem fx:id="option3" mnemonicParsing="false" onAction="#optionThreeHandler" text="Log Out" />
                         </items>
                       </Menu>

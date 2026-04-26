@@ -28,7 +28,6 @@ public class ProfileCard {
 	private VBox labels;
 
 	public void createCard(SortProfiles match, java.util.List<String> descr) {
-		System.out.println(descr.toString());
 		UserProfile otherProfile = match.getOtherProfile();
 		UserProfile userProfile = match.getUserProfile();
 		java.util.List<String> userPrefs = userProfile.getPreferencesAsArray();
@@ -97,7 +96,7 @@ public class ProfileCard {
 			}
 		}
 		
-		return warning.trim();
+		return warning;
 	}
 
 	/*
