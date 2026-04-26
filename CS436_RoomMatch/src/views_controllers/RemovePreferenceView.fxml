@@ -22,7 +22,7 @@
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <ComboBox fx:id="toDelete" prefHeight="47.0" prefWidth="158.0" />
+                  <ComboBox fx:id="deleteOptions" prefHeight="47.0" prefWidth="158.0" />
                </children>
             </HBox>
             <Label alignment="CENTER" prefHeight="52.0" prefWidth="426.0" style="-fx-background-color: #ED593B;" text="Current Preferences" textAlignment="CENTER" textFill="WHITE">
@@ -56,6 +56,7 @@
                   </Button>
                </children>
             </HBox>
+            <Label fx:id="information" prefHeight="17.0" prefWidth="424.0" style="-fx-background-color: #FFDEA5;" textFill="RED" />
          </children>
       </VBox>
    </children>

@@ -152,6 +152,10 @@ public class RoomMatchGUI extends Application {	// TODO: Implement loops in the 
 	public void addPreferenceEntry(String name) {
 		db.addPreferenceEntry(name);
 	}
+	
+	public void removePreferenceEntry(String name) {
+		db.removePreferenceEntry(name);
+	}
 
 	public void saveDealbreakers(boolean sleep, boolean cleanliness, boolean guests) {
 	    db.saveDealbreakers(currentUserId, sleep, cleanliness, guests);

@@ -2,6 +2,7 @@ package views_controllers;
 
 import java.io.IOException;
 
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -21,13 +22,15 @@ public class RemovePreference implements Page {
 	@FXML
 	private ScrollPane scrollPane;
 	@FXML
-	private ComboBox<String> toDelete;
+	private ComboBox<String> deleteOptions; 
 	@FXML
 	private VBox vb;
 	@FXML
 	private Button delete;
 	@FXML
 	private Button returnToMain;
+	@FXML
+	private Label information;
 	
 	@Override
 	public void setMainController(RoomMatchGUI source, UserProfile user) {
@@ -45,12 +48,15 @@ public class RemovePreference implements Page {
 		java.util.List<String> descs, prefs;
 		String options;
 		
+		deleteOptions.setItems(FXCollections.observableArrayList(getMatchDescs()));
+		
 		descs = ReadWrite.RetrieveFileAsTextArr("/txt/descriptions.txt");
 		prefs = ReadWrite.RetrieveFileAsTextArr("/txt/preferences.txt");
 		
 		for(int i=0; i<descs.size(); i++) {
 			Label description = new Label(descs.get(i));
 			description.setFont(system);
+			description.setWrapText(true);
 			vb.getChildren().add(description);
 			options = "Options: ";
 			String split[] = prefs.get(i).split(" ");
@@ -58,6 +64,7 @@ public class RemovePreference implements Page {
 				options += split[j] + (j!=split.length-1 ? ", " : "");
 			}
 			Label preference = new Label(options);
+			preference.setWrapText(true);
 			preference.setFont(system);
 			vb.getChildren().add(preference);
 			vb.getChildren().add(new Label());
@@ -66,9 +73,30 @@ public class RemovePreference implements Page {
 		scrollPane.setContent(vb);
 	}
 	
+	private String[] getMatchDescs() {
+		java.util.List<String> matchDescs = controller.getMatchDescNames();
+		String d[] = new String[matchDescs.size()-1];
+		
+		for(int i=1; i<matchDescs.size(); i++) {
+			d[i-1] = matchDescs.get(i);
+		}
+		
+		return d;
+	}
+	
 	@FXML
 	private void deletePreference(ActionEvent event) {
-		System.out.println("Not yet implemented");
+		String columnToDelete = deleteOptions.getValue();
+		
+		if( columnToDelete == null ) {
+			information.setText("No value selected.");
+			return;
+		}
+		
+		//controller.removePreferenceEntry(columnToDelete);
+		
+		deleteOptions.setValue(null);
+		information.setText("");
 	}
 	
 	@FXML

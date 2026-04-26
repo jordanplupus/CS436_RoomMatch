@@ -57,7 +57,7 @@
                         <TextArea fx:id="pName" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
                      </children>
                   </GridPane>
-                  <Label fx:id="information" prefHeight="39.0" prefWidth="416.0">
+                  <Label fx:id="information" prefHeight="39.0" prefWidth="416.0" textFill="RED">
                      <font>
                         <Font size="14.0" />
                      </font>

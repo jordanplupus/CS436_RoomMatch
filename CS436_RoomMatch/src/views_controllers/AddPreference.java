@@ -92,7 +92,7 @@ public class AddPreference implements Page {
 		ReadWrite.WriteFile("/txt/descriptions.txt", pDescription.getText());
 		
 		for(int i=0; i<options.length; i++) {
-			preference += options[i].trim().replace(' ', '_') + (i!=options.length-1 ? " " : "");
+			preference += options[i].trim().replace(' ', '_') + (i!=options.length-1 ? " " : ""); 
 		}
 		ReadWrite.WriteFile("/txt/preferences.txt", preference);
 		
