@@ -85,18 +85,40 @@ public class RemovePreference implements Page {
 	}
 	
 	@FXML
-	private void deletePreference(ActionEvent event) {
+	private void deletePreference(ActionEvent event) throws IOException {
 		String columnToDelete = deleteOptions.getValue();
+		java.util.List<String> txt;
+		int index = 0;
+		
+		for(String c : deleteOptions.getItems()) {
+			if( c.equals(columnToDelete) ) 
+				break;
+			++index;
+		}
 		
 		if( columnToDelete == null ) {
 			information.setText("No value selected.");
 			return;
 		}
 		
-		//controller.removePreferenceEntry(columnToDelete);
+		// remove from database
+		controller.removePreferenceEntry(columnToDelete);
+		
+		txt = ReadWrite.RetrieveFileAsTextArr("/txt/descriptions.txt");
+		txt.remove(index);
+		ReadWrite.WriteFile("/txt/descriptions.txt", txt);
+		
+		txt = ReadWrite.RetrieveFileAsTextArr("/txt/preferences.txt");
+		txt.remove(index);
+		ReadWrite.WriteFile("/txt/preferences.txt", txt);
+		
+		txt = ReadWrite.RetrieveFileAsTextArr("/txt/weights.txt");
+		txt.remove(index);
+		ReadWrite.WriteFile("/txt/weights.txt", txt);
 		
 		deleteOptions.setValue(null);
 		information.setText("");
+		controller.setToPage(View.REMOVEPREF, "Remove preferences");
 	}
 	
 	@FXML

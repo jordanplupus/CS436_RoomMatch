@@ -33,6 +33,21 @@ public class ReadWrite {
 		writer.close();
 	}
 	
+	public static void WriteFile(String path, java.util.List<String> save) throws IOException {
+		FileWriter writer;
+		String workingDir = System.getProperty("user.dir");
+		String txt = "";
+		
+		for(int i=0; i<save.size(); i++) {
+			txt += save.get(i) + (i!=save.size()-1 ? "\n" : "");
+		}
+		
+		workingDir += path;
+		writer = new FileWriter(workingDir);
+		writer.write(txt);
+		writer.close();
+	}
+	
 	public static ArrayList<String> RetrieveFileAsTextArr(String path) {
 		Scanner file = null;
 		String workingDir = System.getProperty("user.dir");
