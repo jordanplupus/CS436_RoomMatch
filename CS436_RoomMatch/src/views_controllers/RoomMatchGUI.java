@@ -44,8 +44,8 @@ public class RoomMatchGUI extends Application {	// TODO: Implement loops in the 
 		// Show what's in the db
 		db.printAllData();
 		
-		System.out.println(db.getTableEntryCount("preferences"));
-		System.out.println(db.getTableEntryCount("dealbreakers"));
+//		System.out.println(db.getTableEntryCount("preferences"));
+//		System.out.println(db.getTableEntryCount("dealbreakers"));
 		
 		this.stage = stage;
 		window = new BorderPane();

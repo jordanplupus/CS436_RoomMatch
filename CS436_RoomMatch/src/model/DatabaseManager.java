@@ -2,36 +2,46 @@ package model;
 
 import java.sql.*;
 import java.util.Comparator;
+
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.util.Collections;
 import java.util.ArrayList;
 
 // TODO: The database should only be able to be accessed by an admin account. 
 public class DatabaseManager {
-        final private String URL = "jdbc:sqlite:my.db";
+        private final String URL = "jdbc:sqlite:my.db";
         
         private final String FILE = System.getProperty("user.dir") + "\\txt\\p.ser";
         private ArrayList<String> table_entries;
         
         public void init() {
+        	java.util.ArrayList<String> pNames;
+        	pNames = ReadWrite.RetrieveFileAsTextArr("/txt/categories.txt");
+        	// account table
         	String sql1 = "CREATE TABLE IF NOT EXISTS accounts ("
         				+ "id INTEGER PRIMARY KEY,"
         				+ "name text NOT NULL,"
-        				+ "password text NOT NULL"
+        				+ "password text NOT NULL,"
+        				+ "is_admin INTEGER DEFAULT 0"
         				+ ");";
+        	
+        	// preferences table
 			String sql2 = "CREATE TABLE IF NOT EXISTS preferences ("
-						+ "user_id INTEGER PRIMARY KEY,"
-						+ "sleep_schedule TEXT,"
-						+ "cleanliness TEXT,"
-						+ "guests TEXT,"
-						+ "FOREIGN KEY (user_id) REFERENCES accounts(id)"
-						+ ");";
+						+ "user_id INTEGER PRIMARY KEY,";
+			for (int i = 0; i < pNames.size(); i++) {
+				sql2 += pNames.get(i) + " TEXT,";
+			};
+			sql2 += "FOREIGN KEY (user_id) REFERENCES accounts(id));";
+			
+			// deal-breakers table
 			String sql3 = "CREATE TABLE IF NOT EXISTS dealbreakers ("
-			            + "user_id INTEGER PRIMARY KEY,"
-			            + "sleep_schedule INTEGER DEFAULT 0,"
-			            + "cleanliness INTEGER DEFAULT 0,"
-			            + "guests INTEGER DEFAULT 0,"
-			            + "FOREIGN KEY (user_id) REFERENCES accounts(id)"
-			            + ");";
+			            + "user_id INTEGER PRIMARY KEY,";
+			for (int i = 0; i < pNames.size(); i++) {
+				sql3 += pNames.get(i) + " INTEGER DEFAULT 0,";
+			};   
+			sql3 += "FOREIGN KEY (user_id) REFERENCES accounts(id));";
+			
         	try (Connection connection = DriverManager.getConnection(URL); 
         		 Statement stmnt = connection.createStatement()) {
                 stmnt.execute(sql1);
@@ -47,19 +57,18 @@ public class DatabaseManager {
         // Currently just checks if the string admin is the name of the account
         // In future would need to be more secure
         public boolean isAdmin(int userID) {
-        	String sql = "SELECT name FROM accounts WHERE id = " + userID;
-        	String user = "";
+        	String sql = "SELECT is_admin FROM accounts WHERE id = ?";
         	
         	try (Connection conn = DriverManager.getConnection(URL);
-   		         Statement stmt = conn.createStatement();
-   		         ResultSet rs = stmt.executeQuery(sql)) {
-                user = rs.getString(1);
+   		         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        		stmt.setInt(1, userID);
+   		        ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                	return rs.getInt("is_admin") == 1;
+                }
             } catch (SQLException e) {
                 System.err.println(e.getMessage());
             }
-        	
-        	if( user.equalsIgnoreCase("admin") ) 
-        		return true;
         	return false;
         }
         
@@ -184,7 +193,7 @@ public class DatabaseManager {
         }
         
 
-        // TODO Needs Salting and Hashing for security
+
         /**
          * Used to register a new user into the database. 
          * Returns true if user was successfully added. 
@@ -193,6 +202,7 @@ public class DatabaseManager {
          * @return true/false
          */
         public boolean insert(String user, String pass) {
+        	
             String checkSql = "SELECT * FROM accounts WHERE name = ?";
             try (Connection connection = DriverManager.getConnection(URL);
                  PreparedStatement pstmt = connection.prepareStatement(checkSql)) {
@@ -206,12 +216,13 @@ public class DatabaseManager {
                 System.err.println(e.getMessage());
                 return false;
             }
-
+            
             String sql = "INSERT INTO accounts(name,password) VALUES(?,?)";
             try (Connection connection = DriverManager.getConnection(URL);
                  PreparedStatement prepStmnt = connection.prepareStatement(sql)) {
                 prepStmnt.setString(1, user);
-                prepStmnt.setString(2, pass);
+                String hashed = BCrypt.hashpw(pass, BCrypt.gensalt());
+                prepStmnt.setString(2, hashed);
                 prepStmnt.executeUpdate();
                 System.out.println("User inserted");
                 return true;
@@ -236,9 +247,8 @@ public class DatabaseManager {
            		try (ResultSet rs = prepStmnt.executeQuery()) {
            			if (rs.next()) {
            				String pwd = rs.getString("password");
-           				return pwd.equals(pass);
-           			}
-           			else {
+           				return BCrypt.checkpw(pass, pwd);
+           			} else {
            				return false;
            			}
            		}
@@ -306,14 +316,13 @@ public class DatabaseManager {
 			for(int i=0; i<columns.size(); i++) {
 				sql += columns.get(i) + (i != columns.size() - 1 ? ", " : ") ");
 			}
-			
 			sql += "VALUES (" + userID + ", ";
 			
 			for(int i=0; i<preferences.size(); i++) {
 				sql += "'" + preferences.get(i) + "'" + (i != preferences.size() - 1 ? ", " : ") ");
 			}
 			
-			System.out.println(sql);
+			System.out.println("Preference Saved!");
 			
 			try(Connection connection = DriverManager.getConnection(URL);
 				PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -408,7 +417,7 @@ public class DatabaseManager {
 				sql += dealbreakers.get(i) + (i != dealbreakers.size() - 1 ? ", " : ") ");
 			}
 			
-			System.out.println(sql);
+			System.out.println("Deal-breaker Saved!");
 			
 			try(Connection connection = DriverManager.getConnection(URL);
 				PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -417,8 +426,8 @@ public class DatabaseManager {
 				System.err.println(e.getMessage());
 			}
 			
-			ArrayList<Boolean> dlb = getDealbreakers(userId);
-			System.out.println(dlb.toString());
+//			ArrayList<Boolean> dlb = getDealbreakers(userId);
+//			System.out.println(dlb.toString());
 		}
 
 		/**
@@ -641,10 +650,12 @@ public class DatabaseManager {
 		         Statement stmt = conn.createStatement();
 		         ResultSet rs = stmt.executeQuery("SELECT * FROM preferences")) {
 		        while (rs.next()) {
-		            System.out.println("UserID: " + rs.getInt("user_id")
-		                + " | Sleep: " + rs.getString("sleep_schedule")
-		                + " | Clean: " + rs.getString("cleanliness")
-		                + " | Guests: " + rs.getString("guests"));
+		        	java.util.ArrayList<String> categories = ReadWrite.RetrieveFileAsTextArr("/txt/categories.txt");
+		        	String data = "UserID: " + rs.getInt("user_id");
+		        	for (String category : categories) {
+		        		data += " | " + category + ": " +rs.getString(category);
+		        	}
+		        	System.out.println(data);
 		        }
 		    } catch (SQLException e) {
 		        System.err.println(e.getMessage());
@@ -655,10 +666,12 @@ public class DatabaseManager {
 		         Statement stmt = conn.createStatement();
 		         ResultSet rs = stmt.executeQuery("SELECT * FROM dealbreakers")) {
 		        while (rs.next()) {
-		            System.out.println("UserID: " + rs.getInt("user_id")
-		                + " | Sleep: " + rs.getInt("sleep_schedule")
-		                + " | Clean: " + rs.getInt("cleanliness")
-		                + " | Guests: " + rs.getInt("guests"));
+		        	java.util.ArrayList<String> categories = ReadWrite.RetrieveFileAsTextArr("/txt/categories.txt");
+		        	String data = "UserID: " + rs.getInt("user_id");
+		        	for (String category : categories) {
+		        		data += " | " + category + ": " +rs.getInt(category);
+		        	}
+		        	System.out.println(data);
 		        }
 		    } catch (SQLException e) {
 		        System.err.println(e.getMessage());
@@ -671,7 +684,7 @@ public class DatabaseManager {
 		    java.util.ArrayList<String> prefs = new ArrayList<>(getTableEntryCount("dealbreakers"));
 		    java.util.ArrayList<Boolean> dealbreaks = new ArrayList<>(getTableEntryCount("dealbreakers"));
 		    
-		    for(int i=0; i<getTableEntryCount("dealbreaksers"); i++) {
+		    for(int i=0; i<getTableEntryCount("dealbreakers"); i++) {
 		    	prefs.add(null);
 		    	dealbreaks.add(false);
 		    }
@@ -680,10 +693,13 @@ public class DatabaseManager {
 		         PreparedStatement pstmt = connection.prepareStatement(checkSql)) {
 		        ResultSet rs = pstmt.executeQuery();
 		        if (!rs.next()) {
-		            insert("admin", "password");
-		            int adminId = getUserId("admin");
-		            savePreferences(adminId, prefs);
-		            saveDealbreakers(adminId, dealbreaks);
+		        	String sql = "INSERT INTO accounts(name,password, is_admin) VALUES(?,?,1)";
+		        	try (PreparedStatement insertAdmin = connection.prepareStatement(sql)) {
+		        		insertAdmin.setString(1, "admin");
+		        		String hashed = BCrypt.hashpw("password", BCrypt.gensalt());
+		        		insertAdmin.setString(2, hashed);
+		        		insertAdmin.execute();
+		        	} 
 		        }
 		    } catch (SQLException e) {
 		        System.err.println(e.getMessage());

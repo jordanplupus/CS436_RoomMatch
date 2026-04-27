@@ -55,12 +55,13 @@ public class AddPreference implements Page {
 	}
 	
 	private void setInfo() throws IOException {
-		Scanner file1, file2;
+		Scanner file1, file2, file3;
 		String line2;
 		
 		file1 = ReadWrite.ReadFile("/txt/descriptions.txt");
 		file2 = ReadWrite.ReadFile("/txt/preferences.txt");
-		while( file1.hasNextLine() ) {
+		file3 = ReadWrite.ReadFile("/txt/categories.txt")
+;		while( file1.hasNextLine() ) {
 			vb.getChildren().add(new Label("Description: " + file1.nextLine()));
 			line2 = "Options: ";
 			String[] split = file2.nextLine().split(" ");
@@ -120,7 +121,8 @@ public class AddPreference implements Page {
 			String weight = checkWeights[0] + " " + checkWeights[1];
 			ReadWrite.WriteFile("/txt/weights.txt", weight);
 		}
-
+		ReadWrite.WriteFile("/txt/categories.txt", pName.getText());
+		
 		controller.addPreferenceEntry(pName.getText().trim().replace(' ', '_').toLowerCase());
 		
 		pName.setText("");

@@ -8,5 +8,6 @@
 	<classpathentry kind="src" path="CS436_RoomMatch/src"/>
 	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.51.3.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JavaFX"/>
+	<classpathentry kind="lib" path="lib/jbcrypt-0.4.jar"/>
 	<classpathentry kind="output" path="CS436_RoomMatch/bin"/>
 </classpath>
