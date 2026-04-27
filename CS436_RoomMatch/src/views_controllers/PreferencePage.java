@@ -80,6 +80,9 @@ public class PreferencePage implements Page {
 		java.util.List<String> userPrefs = userProfile.getPreferencesAsArray();
 		java.util.List<Boolean> userDeals = userProfile.getDealbreakersAsArray();
 
+		if( userPrefs.isEmpty() || userDeals.isEmpty() ) 
+			return;
+		
 		for (int i = 0; i < this.preferences.size(); i++) {
 			this.preferences.get(i).setValues(userPrefs.get(i), userDeals.get(i));
 		}
